@@ -1,4 +1,3 @@
-#include <iostream>
 #include "../include/graph.hpp"
 
 Graph::Graph(int n) {
@@ -7,4 +6,13 @@ Graph::Graph(int n) {
 
 void Graph::add_edge(int u, int v) {
     this->g[u][v] = this->g[v][u] = 1;
+    this->m++;
+}
+
+int Graph::count_edges() {
+    return this->m;
+}
+
+int Graph::count_vertices() {
+    return this->g.size();
 }
