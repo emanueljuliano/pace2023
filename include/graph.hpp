@@ -6,11 +6,12 @@
 #include <cassert>
 
 typedef std::pair<int, int> Edge;
-typedef std::vector<Edge> ContractionSequence;
+typedef std::vector<std::pair<int, int>> ContractionSequence;
 
 class Graph {
    public:
     Graph(int n);
+    Graph(const Graph& H);
     void add_edge(int u, int v);
     void remove_edge(int u, int v);
     int count_edges() const;

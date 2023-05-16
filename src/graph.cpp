@@ -3,6 +3,22 @@
 Graph::Graph(int n) {
     this->g.assign(n, std::vector<bool>(n, false));
     this->deg.assign(n, 0);
+    this->m = 0;
+}
+
+Graph::Graph(const Graph &H) {
+    int n = H.count_vertices();
+    this->g.assign(n, std::vector<bool>(n, false));
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (H.g[i][j]) this->g[i][j] = true;
+        }
+    }
+    this->deg.assign(n, 0);
+    for (int i = 0; i < n; i++) {
+        this->deg[i] = H.deg[i];
+    }
+    this->m = H.m;
 }
 
 void Graph::add_edge(int u, int v) {
