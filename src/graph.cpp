@@ -1,12 +1,24 @@
 #include "../include/graph.hpp"
 
 Graph::Graph(int n) {
-    this->g.assign(n, std::vector<int>(n, 0));
+    this->g.assign(n, std::vector<bool>(n, false));
+	this->deg.assign(n, 0);
 }
 
 void Graph::add_edge(int u, int v) {
-    this->g[u][v] = this->g[v][u] = 1;
+	assert(u != v);
+	if (this->g[u][v]) return;
+    this->g[u][v] = this->g[v][u] = true;
+	this->deg[u]++, this->deg[v]++;
     this->m++;
+}
+
+void Graph::remove_edge(int u, int v) {
+	assert(u != v);
+	if (!this->g[u][v]) return;
+    this->g[u][v] = this->g[v][u] = false;
+	this->deg[u]--, this->deg[v]--;
+    this->m--;
 }
 
 int Graph::count_edges() {
@@ -35,4 +47,41 @@ std::vector<int> Graph::symmetric_difference(int u, int v) {
         }
     }
     return answer;
+}
+
+std::vector<Edge> Graph::edges() {
+	std::vector<Edge> answer;
+	for (int i = 0; i < this->count_vertices(); i++) {
+		for (int j = i + 1; j < this->count_vertices(); j++) {
+			if (this->g[i][j])
+				answer.emplace_back(i, j);
+		}
+	}
+
+	return answer;
+}
+
+int Graph::degree(int v) {
+	return this->deg[v];
+}
+
+int Graph::width(ContractionSequence& seq) {
+	Graph H(this->count_vertices());
+	int answer = 0;
+	std::vector<bool> erased(this->count_vertices(), false);
+	for (auto [u, p] : seq) {
+		erased[u] = true;
+		for (int x: H.neighborhood(u)) {
+			H.remove_edge(u, x);
+			if (x != p)
+				H.add_edge(p, x);
+		}
+		for (int x: this->symmetric_difference(u, p)) {
+			if (!erased[x])
+				H.add_edge(p, x);
+		}
+		for (int i = 0; i < this->count_vertices(); i++)
+			answer = std::max(answer, H.degree(i));
+	}
+	return answer;
 }

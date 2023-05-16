@@ -1,5 +1,5 @@
 CC = g++
-CXXFLAGS = -std=c++17 -g -Wall
+CXXFLAGS = -std=c++17 -g -Wall -fsanitize=address,undefined -fno-omit-frame-pointer
 
 INCLUDE_FOLDER = ./include/
 OBJ_FOLDER = ./obj/
