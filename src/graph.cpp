@@ -18,11 +18,21 @@ int Graph::count_vertices() {
 }
 
 std::vector<int> Graph::neighborhood(int u) {
-    std::vector<int> v;
+    std::vector<int> answer;
     for (int i = 0; i < g.size(); i++) {
         if (g[u][i]) {
-            v.push_back(i);
+            answer.push_back(i);
         }
     }
-    return v;
+    return answer;
+}
+
+std::vector<int> Graph::symmetric_difference(int u, int v) {
+	std::vector<int> answer;
+    for (int i = 0; i < g.size(); i++) {
+        if (i != u && i != v && g[u][i] ^ g[v][i]) {
+            answer.push_back(i);
+        }
+    }
+    return answer;
 }
