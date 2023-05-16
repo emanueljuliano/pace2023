@@ -6,29 +6,8 @@
 #include <vector>
 #include <iostream>
 
-bool is_connected(Graph g) {
-    int n = g.count_vertices();
-    std::vector<int> vis(n, 0);
-    std::vector<int> stack;
-    stack.push_back(0);
-
-    while (!stack.empty()) {
-        int u = stack.back();
-        stack.pop_back();
-        if (!vis[u]) {
-            vis[u] = 1;
-            for (auto v : g.neighborhood(u)) if (!vis[v])
-                stack.push_back(v);
-        }
-    }
-
-    for (auto u : vis) if (!u) 
-        return false;
-    return true;
-}
-
 Solver::Solver(Graph& g) : g(g) {
-    assert(is_connected(g));
+    assert(g.is_connected());
 }
 
 int Solver::tree_verifier() {
