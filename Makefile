@@ -12,8 +12,11 @@ OBJ = $(patsubst $(SRC_FOLDER)%.cpp, $(OBJ_FOLDER)%.o, $(SRC))
 $(OBJ_FOLDER)%.o: $(SRC_FOLDER)%.cpp
 	$(CC) $(CXXFLAGS) -c $< -o $@ -I$(INCLUDE_FOLDER)
 
-all: $(OBJ)
+all: $(OBJ) cadical
 	$(CC) $(CXXFLAGS) -o ./$(TARGET) $(OBJ)
+
+cadical:
+	cd cadical && ./configure && $(MAKE)
 
 clean:
 	@rm -rf $(OBJ_FOLDER)*
