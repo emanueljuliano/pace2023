@@ -9,6 +9,7 @@ class Graph {
     void add_edge(int u, int v);
     int count_edges();
     int count_vertices();
+    std::vector<int> neighborhood(int u);
 
    private:
     std::vector<std::vector<int>> g;

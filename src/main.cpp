@@ -3,6 +3,7 @@
 #include <string>
 
 #include "../include/graph.hpp"
+#include "../include/solver.hpp"
 
 // TODO: IO Class?
 Graph* read_graph(std::string& filename) {
@@ -32,6 +33,9 @@ int main(int argc, char* argv[]) {
     std::string input_file = argv[1];
 
     Graph* g = read_graph(input_file);
+    Solver* s = new Solver(*g);
+    
+    s->solve();
 
     std::cout << "Done" << std::endl;
 

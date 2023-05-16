@@ -16,3 +16,13 @@ int Graph::count_edges() {
 int Graph::count_vertices() {
     return this->g.size();
 }
+
+std::vector<int> Graph::neighborhood(int u) {
+    std::vector<int> v;
+    for (int i = 0; i < g.size(); i++) {
+        if (g[u][i]) {
+            v.push_back(i);
+        }
+    }
+    return v;
+}
