@@ -19,8 +19,10 @@ class Graph {
     int count_vertices() const;
     std::vector<int> neighborhood(int u) const;
     std::vector<int> symmetric_difference(int u, int v) const;
+    std::vector<std::vector<int>> adjacency_list() const;
     std::vector<Edge> edges() const;
     int degree(int u) const;
+    std::vector<int> degree() const;
     int label(int u) const;
     bool is_connected() const;
 	bool is_tree() const;

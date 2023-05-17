@@ -26,6 +26,19 @@ Graph* read_graph(std::string& filename) {
 	return g;
 }
 
+ContractionSequence read_contraction_sequence(std::string& filename, int length) {
+	ContractionSequence sequence(length);
+
+	std::ifstream in(filename);
+	for (int i = 0; i < length; i++) {
+		in >> sequence[i].first >> sequence[i].second;	
+		sequence[i].first--;
+		sequence[i].second--;
+	}
+
+	return sequence;
+}
+
 int main(int argc, char* argv[]) {
     if (argc <= 1)
         return 1;
@@ -53,7 +66,10 @@ int main(int argc, char* argv[]) {
 	Solver* s = new Solver(*g);
     Graph H(*g);
 
-    s->solve();
+	s->solve();
+    auto w = g->width(s->get_contraction());
+
+    std::cout << "Twin Width: " << w << std::endl;
 
     std::cout << "Done" << std::endl;
 

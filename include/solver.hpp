@@ -8,10 +8,13 @@ class Solver {
    public:
     Solver(Graph& G);
     void solve();
+    void print_contraction();
+    ContractionSequence get_contraction();
 
    private:
-    int tree_verifier();
-    ContractionSequence tree_contractor(int root);
+    ContractionSequence solve_tree();
+    void tree_contractor(int root, int par);
+    ContractionSequence cs;
     Graph& G;
 };
 

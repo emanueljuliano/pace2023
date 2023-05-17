@@ -1,4 +1,5 @@
 #include "../include/graph.hpp"
+#include <vector>
 
 Graph::Graph(int n) {
     this->g.assign(n, std::vector<bool>(n, false));
@@ -83,6 +84,10 @@ std::vector<Edge> Graph::edges() const {
 
 int Graph::degree(int v) const {
     return this->deg[v];
+}
+
+std::vector<int> Graph::degree() const {
+    return this->deg;
 }
 
 int Graph::label(int v) const {
@@ -210,11 +215,27 @@ std::pair<std::vector<Graph>, std::vector<int>> Graph::decompose() const {
 	return std::pair(decomposition, co_tree);
 }
 
+bool Graph::is_tree() const {
+    const int n = this->count_vertices();
+    const int m = this->count_edges();
+    return this->is_connected() && m == n - 1;
+}
+
+std::vector<std::vector<int>> Graph::adjacency_list() const {
+    int n = this->count_vertices();
+    std::vector<std::vector<int>> adj(n);
+    for (int u = 0; u < n; u++) {
+        for (auto v : this->neighborhood(u))
+            adj[u].push_back(v);
+    }
+    return adj;
+}
+
 int Graph::width(const ContractionSequence& seq) const {
     Graph H(this->count_vertices());
     int answer = 0;
     std::vector<bool> erased(this->count_vertices(), false);
-    for (auto [u, p] : seq) {
+    for (auto [p, u] : seq) {
         erased[u] = true;
         for (int x: H.neighborhood(u)) {
             H.remove_edge(u, x);
