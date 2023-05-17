@@ -34,10 +34,13 @@ int main(int argc, char* argv[]) {
 
     Graph* g = read_graph(input_file);
     Solver* s = new Solver(*g);
-    
+    Graph H(*g);
+
     s->solve();
 
     std::cout << "Done" << std::endl;
 
+    delete g;
+    delete s;
 	return 0;
 }

@@ -6,12 +6,13 @@
 // Finds the TWW contraction sequence for a connected graph
 class Solver {
    public:
-    Solver(Graph& g);
+    Solver(Graph& G);
     void solve();
 
    private:
     int tree_verifier();
-    Graph& g;
+    ContractionSequence tree_contractor(int root);
+    Graph& G;
 };
 
 #endif // ! __SOLVER_HPP

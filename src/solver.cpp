@@ -6,13 +6,13 @@
 #include <vector>
 #include <iostream>
 
-Solver::Solver(Graph& g) : g(g) {
-    assert(g.is_connected());
+Solver::Solver(Graph& G) : G(G) {
+    assert(G.is_connected());
 }
 
 int Solver::tree_verifier() {
-    int n = this->g.count_vertices(); assert(n > 1);
-    int m = this->g.count_edges();
+    int n = this->G.count_vertices(); assert(n > 1);
+    int m = this->G.count_edges();
 
     if (m == n - 1) {
         std::vector<int> dist(n, -1);
@@ -23,7 +23,7 @@ int Solver::tree_verifier() {
         while (!stack.empty()) {
             int u = stack.back();
             stack.pop_back();
-            for (auto v : g.neighborhood(u)) if (dist[v] == -1) {
+            for (auto v : this->G.neighborhood(u)) if (dist[v] == -1) {
                 dist[v] = dist[u] + 1;
                 stack.push_back(v);
             }
@@ -42,7 +42,7 @@ int Solver::tree_verifier() {
         while (!stack.empty()) {
             int u = stack.back();
             stack.pop_back();
-            for (auto v : g.neighborhood(u)) if (dist[v] == -1) {
+            for (auto v : this->G.neighborhood(u)) if (dist[v] == -1) {
                 par[v] = u;
                 dist[v] = dist[u] + 1;
                 stack.push_back(v);
@@ -63,7 +63,7 @@ int Solver::tree_verifier() {
 
         std::vector<int> caterpillar(n, 0);
         for (auto u : diameter) {
-            for (auto v : g.neighborhood(u)) {
+            for (auto v : this->G.neighborhood(u)) {
                 caterpillar[v] = 1;
             }
         }
@@ -73,6 +73,11 @@ int Solver::tree_verifier() {
         return 1;
     }
     return -1;
+}
+
+ContractionSequence Solver::tree_contractor(int root) {
+    ContractionSequence answer;
+    return answer;
 }
 
 void Solver::solve() {
