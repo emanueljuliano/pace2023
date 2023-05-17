@@ -4,6 +4,7 @@
 #include <cassert>
 #include <iterator>
 #include <vector>
+#include <set>
 #include <iostream>
 
 Solver::Solver(Graph& G) : G(G) {
@@ -68,6 +69,7 @@ int Solver::tree_verifier() {
             }
         }
 
+        this->tree_contractor(root, root);
         for (auto u : caterpillar) if (!u)
             return 2;
         return 1;
@@ -75,11 +77,32 @@ int Solver::tree_verifier() {
     return -1;
 }
 
-ContractionSequence Solver::tree_contractor(int root) {
-    ContractionSequence answer;
-    return answer;
+void Solver::tree_contractor(int root, int par) {
+    auto nb = this->G.neighborhood(root);
+
+    if (std::find(nb.begin(), nb.end(), par) != nb.end())
+        nb.erase(std::find(nb.begin(), nb.end(), par));
+    if (nb.empty())
+        return;
+
+    this->tree_contractor(nb[0], root);
+    for (int i = 1; i < nb.size(); i++) {
+        this->tree_contractor(nb[i], root);
+        this->cs.emplace_back(nb[0], nb[i]);
+    }
+
+    this->cs.emplace_back(root, nb[0]);
 }
 
 void Solver::solve() {
-    std::cout << tree_verifier() << std::endl;
+    std::cout << "Twin-Width: " << tree_verifier() << std::endl;
+}
+
+void Solver::print_contraction() {
+    for (auto [u, p] : this->cs)
+        std::cout << u << " " << p << std::endl;
+}
+
+ContractionSequence Solver::get_contraction() {
+    return this->cs;
 }
