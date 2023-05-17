@@ -48,11 +48,10 @@ int main(int argc, char* argv[]) {
     Graph* g = read_graph(input_file);
     Solver* s = new Solver(*g);
 
-    s->solve();
-    s->print_contraction();
+	s->solve();
     auto w = g->width(s->get_contraction());
 
-    std::cout << "Kaio's Width: " << w << std::endl;
+    std::cout << "Twin Width: " << w << std::endl;
 
     std::cout << "Done" << std::endl;
 

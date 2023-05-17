@@ -23,6 +23,7 @@ class Graph {
     int degree(int u) const;
     std::vector<int> degree() const;
     bool is_connected() const;
+    bool is_tree() const;
     int width(const ContractionSequence& seq) const;
 
    private:

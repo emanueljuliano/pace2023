@@ -109,6 +109,12 @@ bool Graph::is_connected() const {
     return true;
 }
 
+bool Graph::is_tree() const {
+    const int n = this->count_vertices();
+    const int m = this->count_edges();
+    return this->is_connected() && m == n - 1;
+}
+
 std::vector<std::vector<int>> Graph::adjacency_list() const {
     int n = this->count_vertices();
     std::vector<std::vector<int>> adj(n);
