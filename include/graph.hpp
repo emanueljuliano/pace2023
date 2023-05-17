@@ -24,7 +24,6 @@ class Graph {
     int label(int u) const;
     bool is_connected() const;
 	bool is_tree() const;
-	bool is_caterpillar() const;
 	bool is_bipartite() const;
 	bool is_planar() const; // TODO
 	Graph complement() const;
