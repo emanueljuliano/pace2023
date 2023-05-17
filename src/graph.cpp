@@ -3,6 +3,8 @@
 Graph::Graph(int n) {
     this->g.assign(n, std::vector<bool>(n, false));
     this->deg.assign(n, 0);
+    this->labels.assign(n, 0);
+    std::iota(this->labels.begin(), this->labels.end(), 0);
     this->m = 0;
 }
 
@@ -15,8 +17,10 @@ Graph::Graph(const Graph &H) {
         }
     }
     this->deg.assign(n, 0);
+    this->labels.assign(n, 0);
     for (int i = 0; i < n; i++) {
         this->deg[i] = H.deg[i];
+        this->labels[i] = H.labels[i];
     }
     this->m = H.m;
 }
@@ -81,6 +85,10 @@ int Graph::degree(int v) const {
     return this->deg[v];
 }
 
+int Graph::label(int v) const {
+    return this->labels[v];
+}
+
 bool Graph::is_connected() const {
     const Graph& g = *this;
 
@@ -102,6 +110,104 @@ bool Graph::is_connected() const {
     for (auto u : vis) if (!u) 
         return false;
     return true;
+}
+
+bool Graph::is_bipartite() const {
+    const Graph& g = *this;
+    int n = g.count_vertices();
+    std::vector<int> color(n, -1);
+    std::vector<int> stack;
+    stack.push_back(0);
+	color[0] = 0;
+
+    while (!stack.empty()) {
+        int u = stack.back();
+        stack.pop_back();
+        for (int v : g.neighborhood(u)) {
+            if (color[v] == -1) {
+                color[v] = !color[u];
+                stack.push_back(v);
+            }
+            else if (color[v] == color[u]) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+Graph Graph::complement() const {
+    const Graph& g = *this;
+    int n = g.count_vertices();
+	Graph h(g);
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) if (i != j) {
+			h.g[i][j] = !h.g[i][j];
+        }
+	}
+	return h;
+}
+
+void Graph::decompose(
+	std::vector<Graph>& decomposition, std::vector<int>& co_tree, int parent
+) const {
+    const Graph& g = *this;
+    int n = g.count_vertices();
+	
+	int tree_index = co_tree.size();
+	co_tree.push_back(parent);
+	
+	if (!g.is_connected()) {
+    	std::vector<int> vis(n, 0);
+   	 	std::vector<int> stack;
+		std::vector<std::vector<int>> comp;
+		std::vector<int> compressed(n);
+
+		for (int i = 0; i < n; i++) if (!vis[i]) {
+			stack.push_back(i);
+			vis[i] = 1;
+			comp.emplace_back(1, i);
+
+			while (stack.size()) {
+				int u = stack.back();
+				stack.pop_back();
+				for (int v : g.neighborhood(u)) if (!vis[v]) {
+					vis[v] = 1;
+					stack.push_back(v);
+					comp.back().push_back(v);
+				}
+			}
+			
+			for (int j = 0; j < int(comp.back().size()); j++) {
+				compressed[comp.back()[j]] = j;
+			}
+		}
+		
+		for (std::vector<int> cmp : comp) {
+			Graph h(cmp.size());
+			for (int u : cmp) {
+				h.labels[compressed[u]] = g.labels[u];
+				for (int v : g.neighborhood(u)) {
+					h.add_edge(compressed[u], compressed[v]);
+				}
+			}
+			h.decompose(decomposition, co_tree, tree_index);
+		}
+	}
+	else if (!g.complement().is_connected()) {
+		g.complement().decompose(decomposition, co_tree, tree_index);
+	}
+	else {
+		decomposition.push_back(g);
+	}
+}
+
+std::pair<std::vector<Graph>, std::vector<int>> Graph::decompose() const {
+	std::vector<Graph> decomposition;
+	std::vector<int> co_tree;
+	this->decompose(decomposition, co_tree, -1);
+	return std::pair(decomposition, co_tree);
 }
 
 int Graph::width(const ContractionSequence& seq) const {
