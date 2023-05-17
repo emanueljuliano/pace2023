@@ -12,10 +12,10 @@ SRC = $(wildcard $(SRC_FOLDER)*.cpp)
 OBJ = $(patsubst $(SRC_FOLDER)%.cpp, $(OBJ_FOLDER)%.o, $(SRC))
 
 $(OBJ_FOLDER)%.o: $(SRC_FOLDER)%.cpp cadical
-	$(CC) $(CXXFLAGS) -c $< -o $@ -I$(INCLUDE_FOLDER)
+	$(CC) $(CXXFLAGS) -c $< -o $@ -I$(INCLUDE_FOLDER) -I$(CADICAL_FOLDER)
 
 all: $(OBJ)
-	$(CC) $(CXXFLAGS) -o ./$(TARGET) $(OBJ) -I$(CADICAL_FOLDER) -L$(CADICAL_BUILD) -lcadical
+	$(CC) $(CXXFLAGS) -o ./$(TARGET) $(OBJ) -L$(CADICAL_BUILD) -lcadical
 
 cadical:
 	cd cadical && ./configure && $(MAKE)
