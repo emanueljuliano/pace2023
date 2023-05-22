@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "cadical.hpp"
+#include "../cadical/src/cadical.hpp"
 
 class SatSolver {
    public:
