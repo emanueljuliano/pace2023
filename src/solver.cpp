@@ -180,7 +180,7 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
     };
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            for (int k = j + 1; j < n; j++) {
+            for (int k = j + 1; k < n; k++) {
                 r_variables[std::tuple(i, j, k)] = solver.new_variable();
             }
         }
@@ -238,7 +238,7 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
         }
     }
 
-    // restriction: bookkeeping of 'r' and 'a'
+     restriction: bookkeeping of 'r' and 'a'
     for (int i = 0; i < n; i++) {
         for (int j = i + 1; j < n; j++) {
             for (int k = 0; k < n; k++) {
@@ -293,6 +293,8 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
             }
         }
     }
+
+    std::cout << "Solve code: " << solver.solve() << std::endl;
 
     return {};
 }

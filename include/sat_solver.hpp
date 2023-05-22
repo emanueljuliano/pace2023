@@ -13,6 +13,7 @@ class SatSolver {
     void add_clause(std::vector<int> clause);
     void add_auxiliary_constraint(std::vector<int> variables); // will call only once per object
     void add_cardinality_constraint(int d);
+    int solve();
     
    private:
     int n;
