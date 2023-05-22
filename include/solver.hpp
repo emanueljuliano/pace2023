@@ -13,6 +13,7 @@ class Solver {
 
    private:
     ContractionSequence solve_tree();
+	ContractionSequence solve_sat(int lb=0, int ub=-1);
     void tree_contractor(int root, int par);
     ContractionSequence cs;
     Graph& G;
