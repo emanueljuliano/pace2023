@@ -11,12 +11,14 @@ class SatSolver {
     SatSolver(const SatSolver& s);
     int new_variable();
     void add_clause(std::vector<int> clause);
-    void add_auxiliary_constraint(std::vector<int> variables); // will call only once per object
-    void add_cardinality_constraint(int ub, int lb = 0);
+    void add_auxiliary_constraints(std::vector<int> variables); // will call only once per object
+    void add_cardinality_constraints(int ub, int lb = 0);
     int solve();
     
    private:
-    int n;
+    int index;
+    int t;
+    int f;
     CaDiCaL::Solver solver;
     std::vector<int> constraints;
 };
