@@ -4,6 +4,7 @@
 
 #include "../include/graph.hpp"
 #include "../include/solver.hpp"
+#include "../include/sat_solver.hpp"
 
 // TODO: IO Class?
 Graph* read_graph(std::string& filename) {
@@ -65,6 +66,12 @@ int main(int argc, char* argv[]) {
 
 	Solver* s = new Solver(*g);
     Graph H(*g);
+
+    SatSolver* ss = new SatSolver();
+    std::vector<int> v;
+    for (int i = 0; i < 10; i++) v.push_back(i);
+    ss->add_auxiliary_constraint(v);
+    delete ss;
 
 	s->solve();
     auto w = g->width(s->get_contraction());
