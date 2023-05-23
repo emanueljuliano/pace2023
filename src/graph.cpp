@@ -96,9 +96,9 @@ int Graph::label(int v) const {
 }
 
 bool Graph::is_connected() const {
-    const Graph& g = *this;
+    const Graph& G = *this;
 
-    int n = g.count_vertices();
+    int n = G.count_vertices();
     std::vector<int> vis(n, 0);
     std::vector<int> stack;
     stack.push_back(0);
@@ -108,7 +108,7 @@ bool Graph::is_connected() const {
         stack.pop_back();
         if (!vis[u]) {
             vis[u] = 1;
-            for (auto v : g.neighborhood(u)) if (!vis[v])
+            for (auto v : G.neighborhood(u)) if (!vis[v])
                 stack.push_back(v);
         }
     }
@@ -119,8 +119,8 @@ bool Graph::is_connected() const {
 }
 
 bool Graph::is_bipartite() const {
-    const Graph& g = *this;
-    int n = g.count_vertices();
+    const Graph& G = *this;
+    int n = G.count_vertices();
     std::vector<int> color(n, -1);
     std::vector<int> stack;
     stack.push_back(0);
@@ -129,7 +129,7 @@ bool Graph::is_bipartite() const {
     while (!stack.empty()) {
         int u = stack.back();
         stack.pop_back();
-        for (int v : g.neighborhood(u)) {
+        for (int v : G.neighborhood(u)) {
             if (color[v] == -1) {
                 color[v] = !color[u];
                 stack.push_back(v);
@@ -143,28 +143,28 @@ bool Graph::is_bipartite() const {
 }
 
 Graph Graph::complement() const {
-    const Graph& g = *this;
-    int n = g.count_vertices();
-	Graph h(g);
+    const Graph& G = *this;
+    int n = G.count_vertices();
+	Graph H(G);
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) if (i != j) {
-			h.g[i][j] = !h.g[i][j];
+			H.g[i][j] = !H.g[i][j];
         }
 	}
-	return h;
+	return H;
 }
 
 void Graph::decompose(
 	std::vector<Graph>& decomposition, std::vector<int>& co_tree, int parent
 ) const {
-    const Graph& g = *this;
-    int n = g.count_vertices();
+    const Graph& G = *this;
+    int n = G.count_vertices();
 	
 	int tree_index = co_tree.size();
 	co_tree.push_back(parent);
 	
-	if (!g.is_connected()) {
+	if (!G.is_connected()) {
     	std::vector<int> vis(n, 0);
    	 	std::vector<int> stack;
 		std::vector<std::vector<int>> comp;
@@ -178,7 +178,7 @@ void Graph::decompose(
 			while (stack.size()) {
 				int u = stack.back();
 				stack.pop_back();
-				for (int v : g.neighborhood(u)) if (!vis[v]) {
+				for (int v : G.neighborhood(u)) if (!vis[v]) {
 					vis[v] = 1;
 					stack.push_back(v);
 					comp.back().push_back(v);
@@ -193,19 +193,19 @@ void Graph::decompose(
 		for (std::vector<int> cmp : comp) {
 			Graph h(cmp.size());
 			for (int u : cmp) {
-				h.labels[compressed[u]] = g.labels[u];
-				for (int v : g.neighborhood(u)) {
+				h.labels[compressed[u]] = G.labels[u];
+				for (int v : G.neighborhood(u)) {
 					h.add_edge(compressed[u], compressed[v]);
 				}
 			}
 			h.decompose(decomposition, co_tree, tree_index);
 		}
 	}
-	else if (!g.complement().is_connected()) {
-		g.complement().decompose(decomposition, co_tree, tree_index);
+	else if (!G.complement().is_connected()) {
+		G.complement().decompose(decomposition, co_tree, tree_index);
 	}
 	else {
-		decomposition.push_back(g);
+		decomposition.push_back(G);
 	}
 }
 
@@ -217,9 +217,9 @@ std::pair<std::vector<Graph>, std::vector<int>> Graph::decompose() const {
 }
 
 bool Graph::is_tree() const {
-    const int n = this->count_vertices();
-    const int m = this->count_edges();
-    return this->is_connected() && m == n - 1;
+    const int _n = this->count_vertices();
+    const int _m = this->count_edges();
+    return this->is_connected() && _m == _n - 1;
 }
 
 std::vector<std::vector<int>> Graph::adjacency_list() const {
