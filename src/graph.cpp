@@ -1,6 +1,7 @@
 #include "../include/graph.hpp"
 
 #include <vector>
+#include <queue>
 
 Graph::Graph(int n) {
     this->g.assign(n, std::vector<bool>(n, false));
@@ -113,7 +114,7 @@ bool Graph::is_connected() const {
         }
     }
 
-    for (auto u : vis) if (!u) 
+    for (auto u : vis) if (!u)
         return false;
     return true;
 }
@@ -160,10 +161,10 @@ void Graph::decompose(
 ) const {
     const Graph& G = *this;
     int n = G.count_vertices();
-	
+
 	int tree_index = co_tree.size();
 	co_tree.push_back(parent);
-	
+
 	if (!G.is_connected()) {
     	std::vector<int> vis(n, 0);
    	 	std::vector<int> stack;
@@ -184,12 +185,12 @@ void Graph::decompose(
 					comp.back().push_back(v);
 				}
 			}
-			
+
 			for (int j = 0; j < int(comp.back().size()); j++) {
 				compressed[comp.back()[j]] = j;
 			}
 		}
-		
+
 		for (std::vector<int> cmp : comp) {
 			Graph h(cmp.size());
 			for (int u : cmp) {
@@ -208,6 +209,53 @@ void Graph::decompose(
 		decomposition.push_back(G);
 	}
 }
+
+ContractionSequence Graph::recompose(
+	std::vector<std::pair<ContractionSequence, int>>& seq, std::vector<int>& co_tree
+) const {
+	ContractionSequence ret;
+
+	int n = co_tree.size();
+	std::vector<int> dg(n);
+
+	for (int i = 1; i < n; i++) dg[co_tree[i]]++;
+
+	std::vector<std::vector<int>> to_contract(n);
+	std::queue<int> to_process;
+	for (int i = 0, pos = 0; i < n; i++) if (dg[i] == 0) {
+		for (std::pair<int, int> p : seq[pos].first) {
+			ret.push_back(p);
+		}
+		int rep = seq[pos].second;
+		pos++;
+		to_process.push(i);
+		to_contract[i].push_back(rep);
+	}
+
+	// BFS on co_tree starting from leaves
+	while (to_process.size()) {
+		int u = to_process.front(); to_process.pop();
+
+		while (to_contract[u].size() > 1) {
+			int a = to_contract[u].back(); to_contract[u].pop_back();
+			int b = to_contract[u].back();
+			ret.emplace_back(b, a);
+		}
+		
+		if (u == 0) {
+			break;
+		}
+		
+		int v = co_tree[u];
+		to_contract[v].push_back(to_contract[u].back());
+		dg[v]--;
+
+		if (dg[v] == 0) to_process.push(v);
+	}
+
+	return ret;
+}
+
 
 std::pair<std::vector<Graph>, std::vector<int>> Graph::decompose() const {
 	std::vector<Graph> decomposition;

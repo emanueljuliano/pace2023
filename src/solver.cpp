@@ -91,7 +91,14 @@ void Solver::tree_contractor(int root, int par) {
 }
 
 void Solver::solve() {
-    this->solve_sat();
+	if (this->G.count_vertices() == 1) { // change for is_cograph
+	}
+	else if (this->G.is_tree()) {
+		this->solve_tree();		
+	}
+	else {
+    	this->solve_sat();
+	}
 }
 
 void Solver::print_contraction() {
@@ -186,7 +193,7 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
         }
     }
 
-    // Creating model restrictions 
+    // Creating model restrictions
 
     // restriction: transitivity of the order
     for (int i = 0; i < n; i++) {

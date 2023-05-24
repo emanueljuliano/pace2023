@@ -63,18 +63,38 @@ int main(int argc, char* argv[]) {
 	std::cout << "Co-tree: " << std::endl;
 	for (int i : co_tree) std::cout << i << " ";
 	std::cout << std::endl;
+	
+	std::vector<std::pair<ContractionSequence, int>> seq;
+	for (Graph h : decomposition) {
+		Solver s(h);
+		s.solve();
+		ContractionSequence cs = s.get_contraction();
+		int rep;
+		if (cs.size() == 0) rep = h.label(0);
+		else rep = cs.back().first;
+		
+		std::cout << "\nContraction sequence for first graph " << std::endl;
+		for (auto [a, b] : cs) { 
+			std::cout << a << " " << b << std::endl;
+		}
+		std::cout << "rep: " << rep << std::endl;
 
-	Solver* s = new Solver(*g);
-    Graph H(*g);
+		seq.emplace_back(cs, rep);
+	}
 
-	s->solve();
-    auto w = g->width(s->get_contraction());
+	ContractionSequence result = g->recompose(seq, co_tree);
+	
+	std::cout << "\nresulting contraction" << std::endl;
+	for (auto [a, b] : result) {
+		std::cout << a << " " << b << std::endl;
+	}
+
+    auto w = g->width(result);
 
     std::cout << "Twin Width: " << w << std::endl;
 
     std::cout << "Done" << std::endl;
 
     delete g;
-    delete s;
 	return 0;
 }

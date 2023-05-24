@@ -31,6 +31,7 @@ class Graph {
 	Graph complement() const;
 	std::pair<std::vector<Graph>, std::vector<int>> decompose() const; // TODO
 	void decompose(std::vector<Graph>& g, std::vector<int>& co_tree, int parent) const; // TODO
+    ContractionSequence recompose(std::vector<std::pair<ContractionSequence, int>>& seq, std::vector<int>& co_tree) const;
 	int width(const ContractionSequence& seq) const;
 
    private:
