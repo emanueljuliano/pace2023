@@ -125,7 +125,7 @@ bool Graph::is_bipartite() const {
     std::vector<int> color(n, -1);
     std::vector<int> stack;
     stack.push_back(0);
-	color[0] = 0;
+    color[0] = 0;
 
     while (!stack.empty()) {
         int u = stack.back();
@@ -146,122 +146,122 @@ bool Graph::is_bipartite() const {
 Graph Graph::complement() const {
     const Graph& G = *this;
     int n = G.count_vertices();
-	Graph H(G);
+    Graph H(G);
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) if (i != j) {
-			H.g[i][j] = !H.g[i][j];
+            H.g[i][j] = !H.g[i][j];
         }
-	}
-	return H;
+    }
+    return H;
 }
 
 void Graph::decompose(
-	std::vector<Graph>& decomposition, std::vector<int>& co_tree, int parent
+    std::vector<Graph>& decomposition, std::vector<int>& co_tree, int parent
 ) const {
     const Graph& G = *this;
     int n = G.count_vertices();
 
-	int tree_index = co_tree.size();
-	co_tree.push_back(parent);
+    int tree_index = co_tree.size();
+    co_tree.push_back(parent);
 
-	if (!G.is_connected()) {
-    	std::vector<int> vis(n, 0);
-   	 	std::vector<int> stack;
-		std::vector<std::vector<int>> comp;
-		std::vector<int> compressed(n);
+    if (!G.is_connected()) {
+        std::vector<int> vis(n, 0);
+        std::vector<int> stack;
+        std::vector<std::vector<int>> comp;
+        std::vector<int> compressed(n);
 
-		for (int i = 0; i < n; i++) if (!vis[i]) {
-			stack.push_back(i);
-			vis[i] = 1;
-			comp.emplace_back(1, i);
+        for (int i = 0; i < n; i++) if (!vis[i]) {
+            stack.push_back(i);
+            vis[i] = 1;
+            comp.emplace_back(1, i);
 
-			while (stack.size()) {
-				int u = stack.back();
-				stack.pop_back();
-				for (int v : G.neighborhood(u)) if (!vis[v]) {
-					vis[v] = 1;
-					stack.push_back(v);
-					comp.back().push_back(v);
-				}
-			}
+            while (stack.size()) {
+                int u = stack.back();
+                stack.pop_back();
+                for (int v : G.neighborhood(u)) if (!vis[v]) {
+                    vis[v] = 1;
+                    stack.push_back(v);
+                    comp.back().push_back(v);
+                }
+            }
 
-			for (int j = 0; j < int(comp.back().size()); j++) {
-				compressed[comp.back()[j]] = j;
-			}
-		}
+            for (int j = 0; j < int(comp.back().size()); j++) {
+                compressed[comp.back()[j]] = j;
+            }
+        }
 
-		for (std::vector<int> cmp : comp) {
-			Graph h(cmp.size());
-			for (int u : cmp) {
-				h.labels[compressed[u]] = G.labels[u];
-				for (int v : G.neighborhood(u)) {
-					h.add_edge(compressed[u], compressed[v]);
-				}
-			}
-			h.decompose(decomposition, co_tree, tree_index);
-		}
-	}
-	else if (!G.complement().is_connected()) {
-		G.complement().decompose(decomposition, co_tree, tree_index);
-	}
-	else {
-		decomposition.push_back(G);
-	}
+        for (std::vector<int> cmp : comp) {
+            Graph h(cmp.size());
+            for (int u : cmp) {
+                h.labels[compressed[u]] = G.labels[u];
+                for (int v : G.neighborhood(u)) {
+                    h.add_edge(compressed[u], compressed[v]);
+                }
+            }
+            h.decompose(decomposition, co_tree, tree_index);
+        }
+    }
+    else if (!G.complement().is_connected()) {
+        G.complement().decompose(decomposition, co_tree, tree_index);
+    }
+    else {
+        decomposition.push_back(G);
+    }
 }
 
 ContractionSequence Graph::recompose(
-	std::vector<std::pair<ContractionSequence, int>>& seq, std::vector<int>& co_tree
+    std::vector<std::pair<ContractionSequence, int>>& seq, std::vector<int>& co_tree
 ) const {
-	ContractionSequence ret;
+    ContractionSequence ret;
 
-	int n = co_tree.size();
-	std::vector<int> dg(n);
+    int n = co_tree.size();
+    std::vector<int> dg(n);
 
-	for (int i = 1; i < n; i++) dg[co_tree[i]]++;
+    for (int i = 1; i < n; i++) dg[co_tree[i]]++;
 
-	std::vector<std::vector<int>> to_contract(n);
-	std::queue<int> to_process;
-	for (int i = 0, pos = 0; i < n; i++) if (dg[i] == 0) {
-		for (std::pair<int, int> p : seq[pos].first) {
-			ret.push_back(p);
-		}
-		int rep = seq[pos].second;
-		pos++;
-		to_process.push(i);
-		to_contract[i].push_back(rep);
-	}
+    std::vector<std::vector<int>> to_contract(n);
+    std::queue<int> to_process;
+    for (int i = 0, pos = 0; i < n; i++) if (dg[i] == 0) {
+        for (std::pair<int, int> p : seq[pos].first) {
+            ret.push_back(p);
+        }
+        int rep = seq[pos].second;
+        pos++;
+        to_process.push(i);
+        to_contract[i].push_back(rep);
+    }
 
-	// BFS on co_tree starting from leaves
-	while (to_process.size()) {
-		int u = to_process.front(); to_process.pop();
+    // BFS on co_tree starting from leaves
+    while (to_process.size()) {
+        int u = to_process.front(); to_process.pop();
 
-		while (to_contract[u].size() > 1) {
-			int a = to_contract[u].back(); to_contract[u].pop_back();
-			int b = to_contract[u].back();
-			ret.emplace_back(b, a);
-		}
-		
-		if (u == 0) {
-			break;
-		}
-		
-		int v = co_tree[u];
-		to_contract[v].push_back(to_contract[u].back());
-		dg[v]--;
+        while (to_contract[u].size() > 1) {
+            int a = to_contract[u].back(); to_contract[u].pop_back();
+            int b = to_contract[u].back();
+            ret.emplace_back(b, a);
+        }
+        
+        if (u == 0) {
+            break;
+        }
+        
+        int v = co_tree[u];
+        to_contract[v].push_back(to_contract[u].back());
+        dg[v]--;
 
-		if (dg[v] == 0) to_process.push(v);
-	}
+        if (dg[v] == 0) to_process.push(v);
+    }
 
-	return ret;
+    return ret;
 }
 
 
 std::pair<std::vector<Graph>, std::vector<int>> Graph::decompose() const {
-	std::vector<Graph> decomposition;
-	std::vector<int> co_tree;
-	this->decompose(decomposition, co_tree, -1);
-	return std::pair(decomposition, co_tree);
+    std::vector<Graph> decomposition;
+    std::vector<int> co_tree;
+    this->decompose(decomposition, co_tree, -1);
+    return std::pair(decomposition, co_tree);
 }
 
 bool Graph::is_tree() const {

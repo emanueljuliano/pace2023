@@ -20,7 +20,7 @@ class SatSolver {
     int t;
     int f;
     CaDiCaL::Solver solver;
-    std::vector<int> constraints;
+    std::vector<std::vector<int>> constraints;
 };
 
 #endif // ! __SAT_SOLVER_HPP
