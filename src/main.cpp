@@ -92,11 +92,10 @@ int main(int argc, char* argv[]) {
     Solver s(*g);
     s.solve();
 
-    //auto w = g->width();
+    auto w = g->width(s.get_contraction());
+    std::cerr << "Twin Width: " << w << std::endl;
 
-    //std::cout << "Twin Width: " << w << std::endl;
-
-    std::cout << "Done" << std::endl;
+	s.print_contraction();
 
     delete g;
     return 0;

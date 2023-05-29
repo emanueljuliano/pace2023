@@ -12,6 +12,12 @@ SatSolver::SatSolver() : index(0), solver(), constraints() {
     this->add_clause({-this->f});
 }
 
+SatSolver::SatSolver(const SatSolver& s) {
+	this->index = s.index;
+	s.solver.copy(this->solver);
+	this->constraints = s.constraints;
+}
+
 int SatSolver::new_variable() {
     return ++(this->index);
 }
@@ -26,6 +32,11 @@ void SatSolver::add_clause(std::vector<int> clause) {
 
 int SatSolver::solve() {
     return solver.solve();
+}
+
+int SatSolver::val(int i) {
+	assert(i <= this->index);
+	return this->solver.val(i);
 }
 
 void SatSolver::add_auxiliary_constraints(std::vector<int> variables) {
@@ -81,7 +92,7 @@ void SatSolver::add_cardinality_constraints(int ub, int lb) {
     assert(!this->constraints.empty());
     for (int s = 0; s < (int) this->constraints.size(); s++) {
         // lower bound constraints
-        for (int i = 0; i < lb; i++)
+        for (int i = 0; i < lb - 1; i++)
             this->add_clause({this->constraints[s][i]});
         // upper bound constraints
         for (int i = (int)this->constraints[s].size() - 1; i >= ub; i--)

@@ -14,6 +14,7 @@ class SatSolver {
     void add_auxiliary_constraints(std::vector<int> variables); // will call only once per object
     void add_cardinality_constraints(int ub, int lb = 0);
     int solve();
+	int val(int);
     
    private:
     int index;

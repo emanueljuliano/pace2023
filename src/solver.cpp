@@ -1,3 +1,4 @@
+#include "../include/directed_graph.hpp"
 #include "../include/solver.hpp"
 #include "../include/sat_solver.hpp"
 
@@ -91,7 +92,7 @@ void Solver::tree_contractor(int root, int par) {
 }
 
 void Solver::solve() {
-    this->solve_sat();
+    this->cs = this->solve_sat();
     //if (this->G.count_vertices() == 1) { // change for is_cograph
     //}
     //else if (this->G.is_tree()) {
@@ -103,8 +104,8 @@ void Solver::solve() {
 }
 
 void Solver::print_contraction() {
-    for (auto [u, p] : this->cs)
-        std::cout << u << " " << p << std::endl;
+    for (auto [p, u] : this->cs)
+        std::cout << G.label(p) + 1 << " " << G.label(u) + 1 << std::endl;
 }
 
 ContractionSequence Solver::get_contraction() {
@@ -309,8 +310,46 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
 		}
 	}
 
-	solver.add_cardinality_constraints(lb);
-    std::cout << lb << ": " << solver.solve() << std::endl;
+	// For now, we'll do a binary search
+	while (lb < ub) {
+		int mid = lb + (ub - lb) / 2;
 
-    return {};
+		SatSolver copy = solver;
+		copy.add_cardinality_constraints(mid, lb);
+
+		if (copy.solve() == 10)
+			ub = mid;
+		else
+			lb = mid + 1;
+	}
+
+	solver.add_cardinality_constraints(lb, lb);
+	assert(solver.solve() == 10);
+
+	std::vector<int> parent(n);
+	for (int i = 0; i < n; i++) {
+		for (int j = i + 1; j < n; j++) {
+			if (solver.val(p(i, j)) > 0)
+				parent[i] = j;
+		}
+	}
+
+	Digraph order_graph(n);
+	for (int i = 0; i < n; i++) {
+		for (int j = i + 1; j < n; j++) {
+			if (solver.val(o(i, j)) > 0)
+				order_graph.add_edge(i, j);
+			else
+				order_graph.add_edge(j, i);
+		}
+	}
+
+	auto elimination_order = order_graph.topological_order();
+	ContractionSequence seq;
+	for (auto u : elimination_order)
+		seq.emplace_back(parent[u], u);
+
+	assert(G.width(seq) == lb);
+
+    return seq;
 }
