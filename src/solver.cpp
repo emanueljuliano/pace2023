@@ -91,15 +91,15 @@ void Solver::tree_contractor(int root, int par) {
 }
 
 void Solver::solve() {
-	this->solve_sat();
-    if (this->G.count_vertices() == 1) { // change for is_cograph
-    }
-    else if (this->G.is_tree()) {
-        this->solve_tree();     
-    }
-    else {
-        this->solve_sat();
-    }
+    this->solve_sat();
+    //if (this->G.count_vertices() == 1) { // change for is_cograph
+    //}
+    //else if (this->G.is_tree()) {
+    //    this->solve_tree();     
+    //}
+    //else {
+    //    this->solve_sat();
+    //}
 }
 
 void Solver::print_contraction() {
@@ -164,13 +164,10 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
     std::map<int, std::pair<int, int>> a_reverse_index;
     auto a = [&] (int i, int j) {
         assert(i != j);
-        bool sign = false;
-        if (i > j) {
+        if (i > j) 
             std::swap(i, j);
-            sign = true;
-        }
         assert(a_variables.count(std::pair(i, j)));
-        return (sign ? -1 : 1) * a_variables[std::pair(i, j)];
+        return a_variables[std::pair(i, j)];
     };
     for (int i = 0; i < n; i++) {
         for (int j = i + 1; j < n; j++) {
@@ -184,13 +181,10 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
     std::map<int, std::tuple<int, int, int>> r_reverse_index;
     auto r = [&] (int i, int j, int k) {
         assert(j != k);
-        bool sign = false;
-        if (j > k) {
+        if (j > k)
             std::swap(j, k);
-            sign = true;
-        }
         assert(r_variables.count(std::tuple(i, j, k)));
-        return (sign ? -1 : 1) * r_variables[std::tuple(i, j, k)];
+        return r_variables[std::tuple(i, j, k)];
     };
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
@@ -200,34 +194,6 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
             }
         }
     }
-
-	auto print_variable = [&] (int var) {
-		int index = abs(var);
-		bool sign = (var < 0);
-		if (o_reverse_index.count(index)) {
-			auto [i, j] = o_reverse_index[index];
-			std::cout << (sign ? "-" : "") << "o(" << i << "," << j << ")";
-		} else if (p_reverse_index.count(index)) {
-			auto [i, j] = p_reverse_index[index];
-			std::cout << (sign ? "-" : "") << "p(" << i << "," << j << ")";
-		} else if (a_reverse_index.count(index)) {
-			auto [i, j] = a_reverse_index[index];
-			std::cout << (sign ? "-" : "") << "a(" << i << "," << j << ")";
-		} else if (r_reverse_index.count(index)) {
-			auto [i, j, k] = r_reverse_index[index];
-			std::cout << (sign ? "-" : "") << "r(" << i << "," << j << "," << k << ")";
-		} else {
-			assert(false);
-		}
-	};
-
-	auto print_clause = [&] (std::vector<int>& clause) {
-		for (auto var : clause) {
-			print_variable(var);
-			std::cout << " ";
-		}
-		std::cout << std::endl;
-	};
 
     // Creating model restrictions
 
@@ -239,8 +205,6 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
                     std::vector<int> clause = {
                         -o(i, j), -o(j, k), o(i, k)
                     };
-					//std::cout << "order transitivity: ";
-					//print_clause(clause);
                     solver.add_clause(clause);
                 }
             }
@@ -253,8 +217,6 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
         for (int j = i + 1; j < n; j++) {
             clause.push_back(p(i, j));
         }
-		//std::cout << ">=1 parent: ";
-		//print_clause(clause);
         solver.add_clause(clause);
     }
 
@@ -265,8 +227,6 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
 				std::vector<int> clause = {
 					-p(i, j), -p(i, k)
 				};
-				//std::cout << "<=1 parent: ";
-				//print_clause(clause);
 				solver.add_clause(clause);
 			}
         }
@@ -278,8 +238,6 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
 			std::vector<int> clause = {
 				-p(i, j), o(i, j)
 			};
-			//std::cout << "parent in order: ";
-			//print_clause(clause);
 			solver.add_clause(clause);
 		}
     }
@@ -292,8 +250,6 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
                     std::vector<int> clause = {
                         -o(i, j), -o(i, k), -r(i, j, k), a(j, k)
                     };
-					//std::cout << "bookkeeping: ";
-					//print_clause(clause);
                     solver.add_clause(clause);
                 }
             }
@@ -307,8 +263,6 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
                 std::vector<int> clause = {
                     -p(i, j), -o(i, k), r(i, j, k)
                 };
-				//std::cout << "symmetric: ";
-				//print_clause(clause);
                 solver.add_clause(clause);
             }
         }
@@ -322,8 +276,6 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
                     std::vector<int> clause = {
                         -p(i, j), -o(i, k), -a(i, k), r(i, j, k)
                     };
-					//std::cout << "inheritance: ";
-					//print_clause(clause);
                     solver.add_clause(clause);
                 }
             }
@@ -339,8 +291,6 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
                         std::vector<int> clause = {
                             -o(i, j), -o(j, k), -o(j, m), -r(i, k, m), r(j, k, m)
                         };
-						//std::cout << "Hi -> H_{i+1}: ";
-						//print_clause(clause);
                         solver.add_clause(clause);
                     }
                 }
@@ -355,14 +305,12 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
 			for (int k = 0; k < n; k++) if (j != k) {
 				clause.push_back(r(i, j, k));
 			}
-			//std::cout << "at most one: ";
-			//print_clause(clause);
 			solver.add_auxiliary_constraints(clause);
 		}
 	}
 
-	solver.add_cardinality_constraints(0);
-    std::cout << "Solve code: " << solver.solve() << std::endl;
+	solver.add_cardinality_constraints(lb);
+    std::cout << lb << ": " << solver.solve() << std::endl;
 
     return {};
 }

@@ -8,9 +8,8 @@
 SatSolver::SatSolver() : index(0), solver(), constraints() {
     this->t = this->new_variable();
     this->f = this->new_variable();
-    this->solver.assume(t);
-    this->solver.assume(-f);
-    // ASSUME BEFORE SOLVING?!
+    this->add_clause({this->t});
+    this->add_clause({-this->f});
 }
 
 int SatSolver::new_variable() {
