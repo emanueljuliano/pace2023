@@ -346,8 +346,10 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
 
 	auto elimination_order = order_graph.topological_order();
 	ContractionSequence seq;
-	for (auto u : elimination_order)
+	for (int i = 0; i < n - 1; i++) {
+		int u = elimination_order[i];
 		seq.emplace_back(parent[u], u);
+	}
 
 	assert(G.width(seq) == lb);
 
