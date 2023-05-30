@@ -40,6 +40,23 @@ ContractionSequence read_contraction_sequence(std::string& filename, int length)
     return sequence;
 }
 
+ContractionSequence contract_and_recompose(Graph* g) {
+	auto [decomposition, co_tree] = g->decompose();
+	std::vector<std::pair<ContractionSequence, int>> seq;
+
+	for (Graph h : decomposition) {
+		Solver s(h);
+		s.solve();
+		ContractionSequence cs = s.get_contraction();
+		int rep;
+		if (cs.size() == 0) rep = h.label(0);
+		else rep = cs.back().first;
+		seq.emplace_back(cs, rep);
+	}
+
+	return g->recompose(seq, co_tree);
+}
+
 int main(int argc, char* argv[]) {
     if (argc <= 1)
         return 1;
@@ -47,55 +64,19 @@ int main(int argc, char* argv[]) {
     std::string input_file = argv[1];
 
     Graph* g = read_graph(input_file);
+   	
+    // Solver s(*g);
+    // s.solve();
+	
+	ContractionSequence result = contract_and_recompose(g);
+    auto w = g->width(result);
     
-    //auto [decomposition, co_tree] = g->decompose();
-    //
-    //std::cout << "Decomposition: " << std::endl;
-    //for (Graph h : decomposition) {
-    //    std::cout << "\nNew component\n";
-    //    for (int i = 0; i < h.count_vertices(); i++) {
-    //        std::cout << "vertex: " << i << " label: " << h.label(i);
-    //        std::cout << " neighbours: ";
-    //        for (int j : h.neighborhood(i)) std::cout << j << " ";
-    //        std:: cout << std::endl;
-    //    }
-    //}
-    //std::cout << "Co-tree: " << std::endl;
-    //for (int i : co_tree) std::cout << i << " ";
-    //std::cout << std::endl;
-    //
-    //std::vector<std::pair<ContractionSequence, int>> seq;
-    //for (Graph h : decomposition) {
-    //    Solver s(h);
-    //    s.solve();
-    //    ContractionSequence cs = s.get_contraction();
-    //    int rep;
-    //    if (cs.size() == 0) rep = h.label(0);
-    //    else rep = cs.back().first;
-    //    
-    //    std::cout << "\nContraction sequence for first graph " << std::endl;
-    //    for (auto [a, b] : cs) { 
-    //        std::cout << a << " " << b << std::endl;
-    //    }
-    //    std::cout << "rep: " << rep << std::endl;
+	std::cerr << "Twin Width: " << w << std::endl;
 
-    //    seq.emplace_back(cs, rep);
-    //}
-
-    //ContractionSequence result = g->recompose(seq, co_tree);
-    //
-    //std::cout << "\nresulting contraction" << std::endl;
-    //for (auto [a, b] : result) {
-    //    std::cout << a << " " << b << std::endl;
-    //}
-    
-    Solver s(*g);
-    s.solve();
-
-    auto w = g->width(s.get_contraction());
-    std::cerr << "Twin Width: " << w << std::endl;
-
-	s.print_contraction();
+	// s.print_contraction();
+	for (auto [a, b] : result) {
+		std::cout << a+1 << " " << b+1 << std::endl;
+	}
 
     delete g;
     return 0;

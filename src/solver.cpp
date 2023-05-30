@@ -92,15 +92,15 @@ void Solver::tree_contractor(int root, int par) {
 }
 
 void Solver::solve() {
-    this->cs = this->solve_sat();
-    //if (this->G.count_vertices() == 1) { // change for is_cograph
-    //}
-    //else if (this->G.is_tree()) {
-    //    this->solve_tree();     
-    //}
-    //else {
-    //    this->solve_sat();
-    //}
+    // this->cs = this->solve_sat();
+    if (this->G.count_vertices() == 1) { // change for is_cograph
+    }
+    else if (this->G.is_tree()) {
+       	this->cs = this->solve_tree();     
+    }
+    else {
+        this->cs = this->solve_sat();
+    }
 }
 
 void Solver::print_contraction() {
