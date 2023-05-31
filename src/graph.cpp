@@ -1,7 +1,5 @@
 #include "../include/graph.hpp"
-
-#include <vector>
-#include <queue>
+#include <iostream>
 
 Graph::Graph(int n) {
     this->g.assign(n, std::vector<bool>(n, false));
@@ -156,20 +154,197 @@ Graph Graph::complement() const {
     return H;
 }
 
+std::vector<Graph> Graph::subgraphs(std::vector<std::vector<int>> comp) const {
+	const Graph& G = *this;
+	int n = G.count_vertices();
+	std::vector<int> compressed(n);
+	std::vector<Graph> ret;
+	std::vector<int> id(n);
+
+	for (int i = 0; i < int(comp.size()); i++) {
+		std::vector<int> cmp = comp[i];
+		for (int j = 0; j < int(cmp.size()); j++) {
+			compressed[cmp[j]] = j;
+			id[cmp[j]] = i;
+		}
+	}
+	
+	for (std::vector<int> cmp : comp) {
+		Graph h(cmp.size());
+		for (int u : cmp) {
+			h.labels[compressed[u]] = G.labels[u];
+			for (int v : G.neighborhood(u)) if (id[v] == id[u]) {
+				h.add_edge(compressed[u], compressed[v]);
+			}
+		}
+		ret.push_back(h);
+	}
+	return ret;
+}
+
+std::vector<std::vector<int>> Graph::refine(std::vector<std::vector<int>> &partition, std::vector<int> pivot) const {
+	std::sort(pivot.begin(), pivot.end());
+	std::vector<std::vector<int>> refinement;
+	for (std::vector<int> &X : partition) {
+		std::vector<int> in, out;
+		for (int x : X) {
+			if (std::binary_search(pivot.begin(), pivot.end(), x)) {
+				in.push_back(x);
+			} 
+			else out.push_back(x);
+		}	
+
+		if (in.size()) refinement.push_back(in);
+		if (out.size()) refinement.push_back(out);
+	}
+	return refinement;
+}
+
+bool perp(std::vector<int> &A, std::vector<int> &B) {
+	int inter = 0;
+	bool diffA = false, diffB = false;
+	for (int b : B) {
+		if (std::binary_search(A.begin(), A.end(), b)) inter++;
+		else diffB = true;
+	}
+	
+	if (inter < A.size()) diffA = true;
+
+	return diffA and diffB and inter;
+}
+
+void print_partition(std::vector<std::vector<int>>& partition) {
+	for (auto P : partition) {
+		for (int p : P) std::cout << p << " ";
+		std::cout << std::endl;
+	}
+}
+
+std::vector<std::vector<int>> Graph::modular_partition(std::vector<std::vector<int>> &P) const {
+    const Graph& G = *this;
+	std::vector<std::vector<int>> Q = P, K, L;
+	for (std::vector<int> Z : P) {
+		if (K.empty()) {
+			K.push_back(Z);
+			continue;
+		}
+		if (K[0].size() < Z.size()) swap(K[0], Z);
+		L.push_back(Z);
+	}
+	
+	int iteration = 0;
+	while (L.size() or K.size()) {
+		/*std::cout << "\nIteration: " << iteration++ << std::endl;
+		std::cout << "Q" << std::endl;
+		print_partition(Q);
+		std::cout << "K" << std::endl;
+		print_partition(K);
+		std::cout << "L" << std::endl;
+		print_partition(L);
+		*/
+		std::vector<int> S;
+		if (L.size()) {
+			S = L.back(); L.pop_back();
+		}
+		else {
+			S.push_back(K[0][0]);
+			K.erase(K.begin());
+		}
+
+		for (int x : S) {
+			std::vector<int> neig = G.neighborhood(x);
+			std::sort(neig.begin(), neig.end());
+			int q_size = Q.size();
+			for (int y_id = 0; y_id < q_size; y_id++) {
+				std::vector<int> &Y = Q[y_id];
+				bool is_x = false;
+				for (int y : Y) if (y == x) is_x = true;
+
+				if (is_x) {
+					continue;
+				}
+
+				std::vector<int> in, out;
+				for (int y : Y) {
+					if (std::binary_search(neig.begin(), neig.end(), y))
+						in.push_back(y);
+					else out.push_back(y);
+				}
+				
+				if (in.empty() or out.empty()) continue;
+
+				std::vector<int> Y_min = in, Y_max = out;
+				if (Y_min.size() > Y_max.size()) std::swap(Y_min, Y_max);
+				
+				int idx_l = -1, idx_k = -1;
+				for (int i = 0; i < int(L.size()); i++) if (Y[0] == L[i][0]) idx_l = i;
+				for (int i = 0; i < int(K.size()); i++) if (Y[0] == K[i][0]) idx_k = i;
+
+				if (idx_l != -1) {
+					L[idx_l] = Y_min;
+					L.push_back(Y_max);
+				}
+				else {
+					L.push_back(Y_min);
+					if (idx_k != -1) {
+						K[idx_k] = Y_max;
+					}
+					else K.push_back(Y_max);
+				}
+				
+				Y = Y_max;
+				Q.push_back(Y_min);
+			}
+		}
+	}
+	// std::cout << "Final partition: " << std::endl;
+	// print_partition(Q);
+	return Q;
+}
+
+std::vector<std::vector<int>> Graph::prime_decomposition() const {
+	int n = this->g.size();
+	int x = rand() % n;
+	std::vector<std::vector<int>> partition;
+	partition.push_back({x});
+	std::vector<int> in, out;
+	for (int y = 0; y < n; y++) if (y != x) {
+		if (this->g[x][y]) in.push_back(y);
+		else out.push_back(y);
+	}
+	partition.push_back(in);
+	partition.push_back(out);
+	std::vector<std::vector<int>> modular =  modular_partition(partition);
+
+	for (std::vector<int> mod : modular) {
+		std::vector<int> cnt(n);
+		for (int i : mod) cnt[i] = -1;
+		for (int i : mod) for (int j : this->neighborhood(i)) if (cnt[j] != -1)
+			cnt[j]++;
+		
+		for (int i = 0; i < n; i++) assert(cnt[i] <= 0 or cnt[i] == mod.size());
+	}
+	return modular;
+}
+
 void Graph::decompose(
-    std::vector<Graph>& decomposition, std::vector<int>& co_tree, int parent
+    std::vector<Graph>& decomposition, std::vector<std::pair<int, std::vector<int>>>& modular_tree, int parent
 ) const {
     const Graph& G = *this;
     int n = G.count_vertices();
 
-    int tree_index = co_tree.size();
-    co_tree.push_back(parent);
+    int tree_index = modular_tree.size();
+	modular_tree.emplace_back();
+	modular_tree[tree_index].first = -1;
+    if (parent != -1) modular_tree[parent].second.push_back(tree_index);
 
-    if (!G.is_connected()) {
+	if (n == 1) {
+		decomposition.push_back(G);
+	}
+    else if (!G.is_connected()) {
         std::vector<int> vis(n, 0);
         std::vector<int> stack;
         std::vector<std::vector<int>> comp;
-        std::vector<int> compressed(n);
 
         for (int i = 0; i < n; i++) if (!vis[i]) {
             stack.push_back(i);
@@ -185,83 +360,94 @@ void Graph::decompose(
                     comp.back().push_back(v);
                 }
             }
-
-            for (int j = 0; j < int(comp.back().size()); j++) {
-                compressed[comp.back()[j]] = j;
-            }
         }
-
-        for (std::vector<int> cmp : comp) {
-            Graph h(cmp.size());
-            for (int u : cmp) {
-                h.labels[compressed[u]] = G.labels[u];
-                for (int v : G.neighborhood(u)) {
-                    h.add_edge(compressed[u], compressed[v]);
-                }
-            }
-            h.decompose(decomposition, co_tree, tree_index);
-        }
-    }
+        for (Graph h : G.subgraphs(comp)) {
+			h.decompose(decomposition, modular_tree, tree_index);
+    	}
+	}
     else if (!G.complement().is_connected()) {
-        G.complement().decompose(decomposition, co_tree, tree_index);
+        G.complement().decompose(decomposition, modular_tree, tree_index);
     }
     else {
-        decomposition.push_back(G);
-    }
+        std::vector<std::vector<int>> partition = G.prime_decomposition();
+		
+		if (int(partition.size()) == n) {
+			decomposition.push_back(G);
+    		return;
+		}
+		
+        for (Graph h : G.subgraphs(partition)) {
+			h.decompose(decomposition, modular_tree, tree_index);
+    	}
+		
+		// std::cout << "Current partition " << std::endl;
+		// print_partition(partition);
+		Graph Q(partition.size());
+		for (int i = 0; i < int(partition.size()); i++) {
+			int a = partition[i][0];
+			for (int j = i+1; j < int(partition.size()); j++) {
+				int b = partition[j][0];
+				if (G.g[a][b]) {
+					Q.add_edge(i, j);
+					// std::cout << "edge " << i << " " << j << " " << std::endl; 
+				}
+			}
+		}
+		assert(Q.is_connected());
+		modular_tree[tree_index].first = decomposition.size();
+		decomposition.push_back(Q);
+	}
+}
+
+std::pair<std::vector<Graph>,  std::vector<std::pair<int, std::vector<int>>>> Graph::decompose() const {
+    std::vector<Graph> decomposition;
+    std::vector<std::pair<int, std::vector<int>>> modular_tree;
+    this->decompose(decomposition, modular_tree, -1);
+    return std::pair(decomposition, modular_tree);
 }
 
 ContractionSequence Graph::recompose(
-    std::vector<std::pair<ContractionSequence, int>>& seq, std::vector<int>& co_tree
+    std::vector<std::pair<ContractionSequence, int>>& seq, std::vector<std::pair<int, std::vector<int>>>& modular_tree
 ) const {
     ContractionSequence ret;
+    int n = modular_tree.size();
+	std::vector<int> rep(n);
+	int pos = 0;
+	std::function<void(int)> dfs = [&](int v) {
+		auto [type, neig] = modular_tree[v];
 
-    int n = co_tree.size();
-    std::vector<int> dg(n);
+		if (neig.empty()) { // folha
+			for (std::pair<int, int> p : seq[pos].first) {
+				ret.push_back(p);
+			}
+			rep[v] = seq[pos].second;
+			pos++;
+			return;
+		}
+		
+		std::vector<int> children;
+		for (int u : neig) {
+			dfs(u);
+			children.push_back(rep[u]);
+		}
+		
+		if (modular_tree[v].first == -1) {
+			for (int i = 1; i < int(children.size()); i++) {
+				ret.emplace_back(children[0], children[i]);
+			}
+			rep[v] = children[0];
+		}
+		else {
+			for (auto [a, b] : seq[type].first) {
+				ret.emplace_back(children[a], children[b]);
+			}
+			rep[v] = children[seq[type].second];
+		}
+	};
 
-    for (int i = 1; i < n; i++) dg[co_tree[i]]++;
-
-    std::vector<std::vector<int>> to_contract(n);
-    std::queue<int> to_process;
-    for (int i = 0, pos = 0; i < n; i++) if (dg[i] == 0) {
-        for (std::pair<int, int> p : seq[pos].first) {
-            ret.push_back(p);
-        }
-        int rep = seq[pos].second;
-        pos++;
-        to_process.push(i);
-        to_contract[i].push_back(rep);
-    }
-
-    // BFS on co_tree starting from leaves
-    while (to_process.size()) {
-        int u = to_process.front(); to_process.pop();
-
-        while (to_contract[u].size() > 1) {
-            int a = to_contract[u].back(); to_contract[u].pop_back();
-            int b = to_contract[u].back();
-            ret.emplace_back(b, a);
-        }
-        
-        if (u == 0) {
-            break;
-        }
-        
-        int v = co_tree[u];
-        to_contract[v].push_back(to_contract[u].back());
-        dg[v]--;
-
-        if (dg[v] == 0) to_process.push(v);
-    }
-
+	dfs(0);
+	
     return ret;
-}
-
-
-std::pair<std::vector<Graph>, std::vector<int>> Graph::decompose() const {
-    std::vector<Graph> decomposition;
-    std::vector<int> co_tree;
-    this->decompose(decomposition, co_tree, -1);
-    return std::pair(decomposition, co_tree);
 }
 
 bool Graph::is_tree() const {
