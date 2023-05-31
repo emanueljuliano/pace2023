@@ -1,6 +1,8 @@
 #ifndef __GRAPH_HPP
 #define __GRAPH_HPP
 
+#include <iostream>
+
 #include <cassert>
 #include <numeric>
 #include <vector>
@@ -8,6 +10,7 @@
 #include <algorithm>
 #include <utility>
 #include <functional>
+#include <tuple>
 
 typedef std::pair<int, int> Edge;
 typedef std::vector<std::pair<int, int>> ContractionSequence;
@@ -18,6 +21,7 @@ class Graph {
     Graph(const Graph& H);
     void add_edge(int u, int v);
     void remove_edge(int u, int v);
+	bool has_edge(int u, int v) const;
     int count_edges() const;
     int count_vertices() const;
     std::vector<int> neighborhood(int u) const;
@@ -40,8 +44,11 @@ class Graph {
     void decompose(std::vector<Graph>& g,  std::vector<std::pair<int, std::vector<int>>>& modular_tree, int parent) const;
     ContractionSequence recompose(std::vector<std::pair<ContractionSequence, int>>& seq, std::vector<std::pair<int, std::vector<int>>>& modular_tree) const;
     int width(const ContractionSequence& seq) const;
+	int greedy_width() const;
 
    private:
+	std::pair<std::vector<Edge>, std::vector<Edge>> contraction_edges(const std::vector<bool>&, const Graph& H, int p, int u) const;
+
     std::vector<std::vector<bool>> g;
     std::vector<int> deg;
     std::vector<int> labels;

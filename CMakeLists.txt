@@ -39,7 +39,7 @@ set(SRC_FILES
 add_library(common OBJECT ${SRC_FILES})
 
 ## Configuração para compilação do executável final
-set(CMAKE_CXX_FLAGS "-L./cadical/build")
+set(CMAKE_CXX_FLAGS "-Ofast")
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 add_executable(pace $<TARGET_OBJECTS:common> "${PROJECT_SOURCE_DIR}/src/main.cpp")
 target_link_libraries(pace "-L${PROJECT_SOURCE_DIR}/cadical/build -lcadical")
