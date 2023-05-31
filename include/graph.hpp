@@ -7,7 +7,9 @@
 #include <numeric>
 #include <vector>
 #include <queue>
+#include <algorithm>
 #include <utility>
+#include <functional>
 #include <tuple>
 
 typedef std::pair<int, int> Edge;
@@ -34,9 +36,13 @@ class Graph {
     bool is_bipartite() const;
     bool is_planar() const; // TODO
     Graph complement() const;
-    std::pair<std::vector<Graph>, std::vector<int>> decompose() const; // TODO
-    void decompose(std::vector<Graph>& g, std::vector<int>& co_tree, int parent) const; // TODO
-    ContractionSequence recompose(std::vector<std::pair<ContractionSequence, int>>& seq, std::vector<int>& co_tree) const;
+    std::vector<Graph> subgraphs(std::vector<std::vector<int>> comp) const;
+    std::vector<std::vector<int>> refine(std::vector<std::vector<int>> &partition, std::vector<int> pivot) const;
+    std::vector<std::vector<int>> modular_partition(std::vector<std::vector<int>> &P) const;
+    std::vector<std::vector<int>> prime_decomposition() const;
+	std::pair<std::vector<Graph>, std::vector<std::pair<int, std::vector<int>>>> decompose() const;
+    void decompose(std::vector<Graph>& g,  std::vector<std::pair<int, std::vector<int>>>& modular_tree, int parent) const;
+    ContractionSequence recompose(std::vector<std::pair<ContractionSequence, int>>& seq, std::vector<std::pair<int, std::vector<int>>>& modular_tree) const;
     int width(const ContractionSequence& seq) const;
 	std::pair<int, std::vector<Edge>> greedy_upper_bound() const;
 	int greedy_lower_bound() const;

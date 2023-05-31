@@ -26,10 +26,11 @@ Graph* read_graph() {
 }
 
 ContractionSequence contract_and_recompose(Graph* g) {
-	auto [decomposition, co_tree] = g->decompose();
+	auto [decomposition, modular_tree] = g->decompose();
 	std::vector<std::pair<ContractionSequence, int>> seq;
-
+	std::cerr << "Decomposition size: " << decomposition.size() << std::endl;
 	for (Graph h : decomposition) {
+		std::cerr << "Size of h: " << h.count_vertices() << std::endl;
 		Solver s(h);
 		s.solve();
 		ContractionSequence cs = s.get_contraction();
@@ -39,7 +40,7 @@ ContractionSequence contract_and_recompose(Graph* g) {
 		seq.emplace_back(cs, rep);
 	}
 
-	return g->recompose(seq, co_tree);
+	return g->recompose(seq, modular_tree);
 }
 
 int main(int argc, char* argv[]) {
@@ -55,7 +56,7 @@ int main(int argc, char* argv[]) {
 
 	// s.print_contraction();
 	for (auto [a, b] : result) {
-		std::cout << a+1 << " " << b+1 << std::endl;
+		//std::cout << a+1 << " " << b+1 << std::endl;
 	}
 
     delete g;
