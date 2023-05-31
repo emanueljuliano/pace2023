@@ -301,7 +301,7 @@ Graph::contraction_edges(
 	return std::pair(to_remove, to_add);
 }
 
-int Graph::greedy_upper_bound() const {
+std::pair<int, ContractionSequence> Graph::greedy_upper_bound() const {
 	const int n = this->count_vertices();
 	Graph H(n);
 	int answer = 0;
@@ -350,7 +350,7 @@ int Graph::greedy_upper_bound() const {
 	assert(this->width(seq) == answer);
 	std::cerr << "Greedy Upper Bound: " << answer << std::endl;
 
-	return answer;
+	return std::pair(answer, seq);
 }
 
 int Graph::greedy_lower_bound() const {
@@ -359,7 +359,7 @@ int Graph::greedy_lower_bound() const {
 	std::vector<bool> removed(n, false);
 
 	ContractionSequence seq;
-	std::tuple<int, int, int> best_choice(n, 0, 0);
+	int answer = n;
 	for (int p = 0; p < n; p++) if (!removed[p]) {
 		for (int u = p + 1; u < n; u++) if (!removed[u]) {
 			auto [to_remove, to_add] = this->contraction_edges(removed, H, p, u);
@@ -373,7 +373,7 @@ int Graph::greedy_lower_bound() const {
 			int max_deg = 0;
 			for (int i = 0; i < n; i++)
 				max_deg = std::max(max_deg, H.degree(i));
-			best_choice = std::min(best_choice, std::tuple(max_deg, p, u));
+			answer = std::min(answer, max_deg);
 
 			for (auto [x, y] : to_remove)
 				H.add_edge(x, y);
@@ -382,9 +382,9 @@ int Graph::greedy_lower_bound() const {
 				H.remove_edge(x, y);
 		}
 	}
-	std::cerr << "Greedy Lower Bound: " << std::get<0>(best_choice) << std::endl;
+	std::cerr << "Greedy Lower Bound: " << answer << std::endl;
 
-	return std::get<0>(best_choice);
+	return answer;
 }
 
 int Graph::width(const ContractionSequence& seq) const {
