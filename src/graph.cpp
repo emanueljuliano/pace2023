@@ -1,8 +1,5 @@
 #include "../include/graph.hpp"
 
-#include <vector>
-#include <queue>
-
 Graph::Graph(int n) {
     this->g.assign(n, std::vector<bool>(n, false));
     this->deg.assign(n, 0);
@@ -44,6 +41,11 @@ void Graph::remove_edge(int u, int v) {
     this->m--;
 }
 
+bool Graph::has_edge(int u, int v) const {
+    assert(u != v);
+	return this->g[u][v];
+}
+
 int Graph::count_edges() const {
     return this->m;
 }
@@ -65,7 +67,7 @@ std::vector<int> Graph::neighborhood(int u) const {
 std::vector<int> Graph::symmetric_difference(int u, int v) const {
     std::vector<int> answer;
     for (int i = 0; i < (int)g.size(); i++) {
-        if (i != u && i != v && g[u][i] ^ g[v][i]) {
+        if (i != u && i != v && g[u][i] != g[v][i]) {
             answer.push_back(i);
         }
     }
@@ -280,23 +282,92 @@ std::vector<std::vector<int>> Graph::adjacency_list() const {
     return adj;
 }
 
+// Returns the set of edges to be removed, and the set of edges to be added in a contraction
+std::pair<std::vector<Edge>, std::vector<Edge>>
+Graph::contraction_edges(
+		const std::vector<bool>& removed, const Graph& H, int p, int u
+) const {
+	std::vector<Edge> to_remove, to_add;
+	for (int x: H.neighborhood(u)) {
+		to_remove.emplace_back(u, x);
+		if (x != p && !H.has_edge(p, x))
+			to_add.emplace_back(p, x);
+	}
+	for (int x: this->symmetric_difference(u, p)) {
+		if (!removed[x] and !H.has_edge(p, x))
+			to_add.emplace_back(p, x);
+	}
+
+	return std::pair(to_remove, to_add);
+}
+
+int Graph::greedy_width() const {
+	const int n = this->count_vertices();
+	Graph H(n);
+	int answer = 0;
+	std::vector<bool> removed(n, false);
+
+	ContractionSequence seq;
+	for (int iter = 0; iter < n - 1; iter++) {
+		std::tuple<int, int, int> best_choice(n, 0, 0);
+		for (int p = 0; p < n; p++) if (!removed[p]) {
+			for (int u = p + 1; u < n; u++) if (!removed[u]) {
+				auto [to_remove, to_add] = this->contraction_edges(removed, H, p, u);
+
+				for (auto [x, y] : to_remove)
+					H.remove_edge(x, y);
+
+				for (auto [x, y] : to_add)
+					H.add_edge(x, y);
+
+				int max_deg = 0;
+				for (int i = 0; i < n; i++)
+					max_deg = std::max(max_deg, H.degree(i));
+				best_choice = std::min(best_choice, std::tuple(max_deg, p, u));
+
+				for (auto [x, y] : to_remove)
+					H.add_edge(x, y);
+
+				for (auto [x, y] : to_add)
+					H.remove_edge(x, y);
+			}
+		}
+
+		auto [max_deg, p, u] = best_choice;
+		assert(max_deg != n && p != u);
+		seq.emplace_back(p, u);
+
+		answer = std::max(answer, max_deg);
+
+		auto [to_remove, to_add] = this->contraction_edges(removed, H, p, u);
+		removed[u] = true;
+		for (auto [x, y] : to_remove)
+			H.remove_edge(x, y);
+
+		for (auto [x, y] : to_add)
+			H.add_edge(x, y);
+	}
+	assert(this->width(seq) == answer);
+	std::cerr << "Greedy Upper Bound: " << answer << std::endl;
+
+	return answer;
+}
+
 int Graph::width(const ContractionSequence& seq) const {
-    Graph H(this->count_vertices());
-    int answer = 0;
-    std::vector<bool> erased(this->count_vertices(), false);
-    for (auto [p, u] : seq) {
-        erased[u] = true;
-        for (int x: H.neighborhood(u)) {
-            H.remove_edge(u, x);
-            if (x != p)
-                H.add_edge(p, x);
-        }
-        for (int x: this->symmetric_difference(u, p)) {
-            if (!erased[x])
-                H.add_edge(p, x);
-        }
-        for (int i = 0; i < this->count_vertices(); i++)
-            answer = std::max(answer, H.degree(i));
-    }
-    return answer;
+	Graph H(this->count_vertices());
+	int answer = 0;
+	std::vector<bool> removed(this->count_vertices(), false);
+	for (auto [p, u] : seq) {
+		auto [to_remove, to_add] = this->contraction_edges(removed, H, p, u);
+		removed[u] = true;
+		for (auto [x, y] : to_remove)
+			H.remove_edge(x, y);
+
+		for (auto [x, y] : to_add)
+			H.add_edge(x, y);
+
+		for (int i = 0; i < this->count_vertices(); i++)
+			answer = std::max(answer, H.degree(i));
+	}
+	return answer;
 }
