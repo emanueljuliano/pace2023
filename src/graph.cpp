@@ -186,6 +186,18 @@ std::vector<Graph> Graph::subgraphs(std::vector<std::vector<int>> comp) const {
 	return ret;
 }
 
+Graph Graph::quotient(std::vector<std::vector<int>>& partition) const {
+	Graph Q(partition.size());
+	for (int i = 0; i < int(partition.size()); i++) {
+		int a = partition[i][0];
+		for (int j = i+1; j < int(partition.size()); j++) {
+			int b = partition[j][0];
+			if (this->has_edge(a, b)) Q.add_edge(i, j);
+		}
+	}
+	return Q;
+}
+
 std::vector<std::vector<int>> Graph::refine(std::vector<std::vector<int>> &partition, std::vector<int> pivot) const {
 	std::sort(pivot.begin(), pivot.end());
 	std::vector<std::vector<int>> refinement;
@@ -307,19 +319,34 @@ std::vector<std::vector<int>> Graph::modular_partition(std::vector<std::vector<i
 
 std::vector<std::vector<int>> Graph::prime_decomposition() const {
 	int n = this->g.size();
-	int x = rand() % n;
-	std::vector<std::vector<int>> partition;
-	partition.push_back({x});
-	std::vector<int> in, out;
-	for (int y = 0; y < n; y++) if (y != x) {
-		if (this->g[x][y]) in.push_back(y);
-		else out.push_back(y);
+	std::vector<std::vector<int>> ret;
+	Graph G_cur = *this;
+	for (int x = 0; x < n; x++) {
+		std::vector<std::vector<int>> partition;
+		partition.push_back({x});
+		std::vector<int> in, out;
+		for (int y = 0; y < n; y++) if (y != x) {
+			if (this->g[x][y]) in.push_back(y);
+			else out.push_back(y);
+		}
+		partition.push_back(in);
+		partition.push_back(out);
+		std::vector<std::vector<int>> modular =  modular_partition(partition);
+		if (ret.empty()) {
+			ret = modular;
+			G_cur = this->quotient(modular);
+		}
+		else {
+			Graph G_new = this->quotient(modular);
+			if (G_new.count_edges()*G_cur.count_vertices() 
+				< G_cur.count_edges()*G_new.count_vertices()) {
+				ret = modular;
+				G_cur = G_new;
+			}
+		}
 	}
-	partition.push_back(in);
-	partition.push_back(out);
-	std::vector<std::vector<int>> modular =  modular_partition(partition);
 
-	for (std::vector<int> mod : modular) {
+	for (std::vector<int> mod : ret) {
 		std::vector<int> cnt(n);
 		for (int i : mod) cnt[i] = -1;
 		for (int i : mod) for (int j : this->neighborhood(i)) if (cnt[j] != -1)
@@ -327,7 +354,7 @@ std::vector<std::vector<int>> Graph::prime_decomposition() const {
 		
 		for (int i = 0; i < n; i++) assert(cnt[i] <= 0 or cnt[i] == int(mod.size()));
 	}
-	return modular;
+	return ret;
 }
 
 void Graph::decompose(
@@ -383,19 +410,7 @@ void Graph::decompose(
 			h.decompose(decomposition, modular_tree, tree_index);
     	}
 		
-		// std::cout << "Current partition " << std::endl;
-		// print_partition(partition);
-		Graph Q(partition.size());
-		for (int i = 0; i < int(partition.size()); i++) {
-			int a = partition[i][0];
-			for (int j = i+1; j < int(partition.size()); j++) {
-				int b = partition[j][0];
-				if (G.g[a][b]) {
-					Q.add_edge(i, j);
-					// std::cout << "edge " << i << " " << j << " " << std::endl; 
-				}
-			}
-		}
+		Graph Q = G.quotient(partition);
 		assert(Q.is_connected());
 		modular_tree[tree_index].first = decomposition.size();
 		decomposition.push_back(Q);

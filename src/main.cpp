@@ -39,7 +39,6 @@ ContractionSequence contract_and_recompose(Graph* g) {
 		else rep = cs.back().first;
 		seq.emplace_back(cs, rep);
 	}
-
 	return g->recompose(seq, modular_tree);
 }
 
@@ -56,7 +55,7 @@ int main(int argc, char* argv[]) {
 
 	// s.print_contraction();
 	for (auto [a, b] : result) {
-		//std::cout << a+1 << " " << b+1 << std::endl;
+		std::cout << a+1 << " " << b+1 << std::endl;
 	}
 
     delete g;

@@ -34,9 +34,10 @@ class Graph {
     bool is_connected() const;
     bool is_tree() const;
     bool is_bipartite() const;
-    bool is_planar() const; // TODO
+    bool is_planar() const; // TONOTDO
     Graph complement() const;
     std::vector<Graph> subgraphs(std::vector<std::vector<int>> comp) const;
+	Graph quotient(std::vector<std::vector<int>>& partition) const;
     std::vector<std::vector<int>> refine(std::vector<std::vector<int>> &partition, std::vector<int> pivot) const;
     std::vector<std::vector<int>> modular_partition(std::vector<std::vector<int>> &P) const;
     std::vector<std::vector<int>> prime_decomposition() const;

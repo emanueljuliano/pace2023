@@ -94,7 +94,8 @@ void Solver::tree_contractor(int root, int par) {
 void Solver::solve() {
     // this->cs = this->solve_sat();
     if (this->G.count_vertices() == 1) { // change for is_cograph
-    }
+    	this->cs.clear();
+	}
     else if (this->G.is_tree()) {
        	this->cs = this->solve_tree();     
     }
