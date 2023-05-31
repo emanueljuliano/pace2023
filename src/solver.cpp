@@ -100,7 +100,12 @@ void Solver::solve() {
        	this->cs = this->solve_tree();     
     }
     else {
-        this->cs = this->solve_sat(1, G.greedy_width());
+		auto [ub, seq] = G.greedy_upper_bound();
+		int lb = std::max(1, G.greedy_lower_bound());
+		if (lb == ub)
+			this->cs = seq;
+		else
+			this->cs = this->solve_sat(lb, ub);
     }
 }
 
