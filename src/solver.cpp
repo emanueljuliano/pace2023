@@ -99,7 +99,7 @@ void Solver::solve() {
        	this->cs = this->solve_tree();     
     }
     else {
-        this->cs = this->solve_sat(1, G.greedy_width());
+        this->cs = this->solve_sat(G.greedy_lower_bound(), G.greedy_upper_bound());
     }
 }
 

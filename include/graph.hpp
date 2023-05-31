@@ -38,7 +38,8 @@ class Graph {
     void decompose(std::vector<Graph>& g, std::vector<int>& co_tree, int parent) const; // TODO
     ContractionSequence recompose(std::vector<std::pair<ContractionSequence, int>>& seq, std::vector<int>& co_tree) const;
     int width(const ContractionSequence& seq) const;
-	int greedy_width() const;
+	int greedy_upper_bound() const;
+	int greedy_lower_bound() const;
 
    private:
 	std::pair<std::vector<Edge>, std::vector<Edge>> contraction_edges(const std::vector<bool>&, const Graph& H, int p, int u) const;
