@@ -212,7 +212,7 @@ bool perp(std::vector<int> &A, std::vector<int> &B) {
 		else diffB = true;
 	}
 	
-	if (inter < A.size()) diffA = true;
+	if (inter < int(A.size())) diffA = true;
 
 	return diffA and diffB and inter;
 }
@@ -236,7 +236,6 @@ std::vector<std::vector<int>> Graph::modular_partition(std::vector<std::vector<i
 		L.push_back(Z);
 	}
 	
-	int iteration = 0;
 	while (L.size() or K.size()) {
 		/*std::cout << "\nIteration: " << iteration++ << std::endl;
 		std::cout << "Q" << std::endl;
@@ -326,7 +325,7 @@ std::vector<std::vector<int>> Graph::prime_decomposition() const {
 		for (int i : mod) for (int j : this->neighborhood(i)) if (cnt[j] != -1)
 			cnt[j]++;
 		
-		for (int i = 0; i < n; i++) assert(cnt[i] <= 0 or cnt[i] == mod.size());
+		for (int i = 0; i < n; i++) assert(cnt[i] <= 0 or cnt[i] == int(mod.size()));
 	}
 	return modular;
 }
