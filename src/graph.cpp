@@ -322,6 +322,7 @@ std::vector<std::vector<int>> Graph::prime_decomposition() const {
 	std::vector<std::vector<int>> ret;
 	Graph G_cur(n);
 	for (int x = 0; x < n; x++) {
+		if (x*n >= 2e5) break;
 		std::vector<std::vector<int>> partition;
 		partition.push_back({x});
 		std::vector<int> in, out;
