@@ -3,10 +3,10 @@
 TEST_CASES="./tests/exact-public/*"
 PROGRAM="./build/pace"
 
-N=34
+N=25
 
-function kaio() {
-	timeout 10m $PROGRAM < $f &> /dev/null;
+function run_test() {
+	timeout 30m $PROGRAM < $f &> /dev/null;
 	if [ $? != 124 ]; then
 		echo $1
 	fi
@@ -15,5 +15,5 @@ function kaio() {
 for f in $TEST_CASES
 do
 	((i=i%N)); ((i++==0)) && wait
-	kaio $f &
+	run_test $f &
 done
