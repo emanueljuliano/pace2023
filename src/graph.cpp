@@ -551,7 +551,7 @@ std::pair<int, ContractionSequence> Graph::greedy_upper_bound() const {
 			H.add_edge(x, y);
 	}
 	assert(this->width(seq) == answer);
-	std::cerr << "Greedy Upper Bound: " << answer << std::endl;
+	// std::cerr << "Greedy Upper Bound: " << answer << std::endl;
 
 	return std::pair(answer, seq);
 }
@@ -585,7 +585,7 @@ int Graph::greedy_lower_bound() const {
 				H.remove_edge(x, y);
 		}
 	}
-	std::cerr << "Greedy Lower Bound: " << answer << std::endl;
+	// std::cerr << "Greedy Lower Bound: " << answer << std::endl;
 
 	return answer;
 }

@@ -3,13 +3,12 @@
 TEST_CASES="./tests/exact-public/*"
 PROGRAM="./build/pace"
 
-N=25
+N=35
 
 function run_test() {
-	timeout 30m $PROGRAM < $f &> /dev/null;
-	if [ $? != 124 ]; then
-		echo $1
-	fi
+	timeout 30m $PROGRAM < $f > /dev/null;
+	echo "$1 $?";
+	echo "$1 $?" >> output2.txt;
 }
 
 for f in $TEST_CASES
