@@ -316,46 +316,63 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
 		}
 	}
 
-	// For now, we'll do a binary search
+	auto get_sequence_from_solver = [&] (SatSolver& solver) {
+		std::vector<int> parent(n);
+		for (int i = 0; i < n; i++) {
+			for (int j = i + 1; j < n; j++) {
+				if (solver.val(p(i, j)) > 0)
+					parent[i] = j;
+			}
+		}
+
+		Digraph order_graph(n);
+		for (int i = 0; i < n; i++) {
+			for (int j = i + 1; j < n; j++) {
+				if (solver.val(o(i, j)) > 0)
+					order_graph.add_edge(i, j);
+				else
+					order_graph.add_edge(j, i);
+			}
+		}
+
+		auto elimination_order = order_graph.topological_order();
+		ContractionSequence seq;
+		for (int i = 0; i < n - 1; i++) {
+			int u = elimination_order[i];
+			seq.emplace_back(parent[u], u);
+		}
+
+		return seq;
+	};
+
+	std::pair<int, ContractionSequence> best(ub + 1, {});
+
 	while (lb < ub) {
 		int mid = lb + (ub - lb) / 2;
 
 		SatSolver copy = solver;
 		copy.add_cardinality_constraints(mid, lb);
 
-		if (copy.solve() == 10)
+		if (copy.solve() == 10) {
 			ub = mid;
-		else
+
+			if (ub < best.first) {
+				best = std::pair(ub, get_sequence_from_solver(copy));
+			}
+		} else
 			lb = mid + 1;
 	}
 
-	solver.add_cardinality_constraints(lb, lb);
-	assert(solver.solve() == 10);
-
-	std::vector<int> parent(n);
-	for (int i = 0; i < n; i++) {
-		for (int j = i + 1; j < n; j++) {
-			if (solver.val(p(i, j)) > 0)
-				parent[i] = j;
-		}
-	}
-
-	Digraph order_graph(n);
-	for (int i = 0; i < n; i++) {
-		for (int j = i + 1; j < n; j++) {
-			if (solver.val(o(i, j)) > 0)
-				order_graph.add_edge(i, j);
-			else
-				order_graph.add_edge(j, i);
-		}
-	}
-
-	auto elimination_order = order_graph.topological_order();
 	ContractionSequence seq;
-	for (int i = 0; i < n - 1; i++) {
-		int u = elimination_order[i];
-		seq.emplace_back(parent[u], u);
+
+	if (best.first == lb) {
+		seq = best.second;
+	} else {
+		solver.add_cardinality_constraints(lb, lb);
+		assert(solver.solve() == 10);
+		seq = get_sequence_from_solver(solver);
 	}
+
 
 	assert(G.width(seq) == lb);
 
