@@ -34,7 +34,6 @@ class Graph {
     bool is_connected() const;
     bool is_tree() const;
     bool is_bipartite() const;
-    bool is_planar() const; // TONOTDO
     Graph complement() const;
     std::vector<Graph> subgraphs(std::vector<std::vector<int>> comp) const;
 	Graph quotient(std::vector<std::vector<int>>& partition) const;

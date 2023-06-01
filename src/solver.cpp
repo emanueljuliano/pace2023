@@ -92,8 +92,7 @@ void Solver::tree_contractor(int root, int par) {
 }
 
 void Solver::solve() {
-    // this->cs = this->solve_sat();
-    if (this->G.count_vertices() == 1) { // change for is_cograph
+    if (this->G.count_vertices() == 1) {
     	this->cs.clear();
 	}
     else if (this->G.is_tree()) {
@@ -124,8 +123,6 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
 
     SatSolver solver;
 
-    // TODO: There will be a lot of repeated code
-    // Maybe it is worth to refactor it
     // Indexing o-variables
     std::map<std::pair<int, int>, int> o_variables;
     std::map<int, std::pair<int, int>> o_reverse_index;
@@ -372,7 +369,6 @@ ContractionSequence Solver::solve_sat(int lb, int ub) {
 		assert(solver.solve() == 10);
 		seq = get_sequence_from_solver(solver);
 	}
-
 
 	assert(G.width(seq) == lb);
 

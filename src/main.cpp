@@ -1,26 +1,39 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
 
 #include "../include/graph.hpp"
 #include "../include/solver.hpp"
 #include "../include/sat_solver.hpp"
 
-// TODO: IO Class?
+void read_next_line(std::istringstream& in) {
+	std::string line;
+	while (std::getline(std::cin, line)) {
+		if (line[0] == 'c') continue;
+		in = std::istringstream(line);
+		return;
+	}
+	assert(false);
+}
+
 Graph* read_graph() {
-    std::string s;  
-	std::cin >> s >> s;
-    
+	std::istringstream in;
+	read_next_line(in);
+
+	std::string s;
     int n, m;
-	std::cin >> n >> m;
+	in >> s >> s >> n >> m;
 
     Graph* g = new Graph(n);
 
-    for (int i = 0; i < m; i++) {
+	for (int i = 0; i < m; i++) {
+		read_next_line(in);
         int a, b;
-		std::cin >> a >> b;
+		in >> a >> b;
         g->add_edge(a - 1, b - 1);
-    }
+		std::cout << "? " << a << " " << b << std::endl;
+	}
 
     return g;
 }

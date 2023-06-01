@@ -229,13 +229,6 @@ bool perp(std::vector<int> &A, std::vector<int> &B) {
 	return diffA and diffB and inter;
 }
 
-/*void print_partition(std::vector<std::vector<int>>& partition) {
-	for (auto P : partition) {
-		for (int p : P) std::cout << p << " ";
-		std::cout << std::endl;
-	}
-}*/
-
 std::vector<std::vector<int>> Graph::modular_partition(std::vector<std::vector<int>> &P) const {
     const Graph& G = *this;
 	std::vector<std::vector<int>> Q = P, K, L;
@@ -249,14 +242,6 @@ std::vector<std::vector<int>> Graph::modular_partition(std::vector<std::vector<i
 	}
 	
 	while (L.size() or K.size()) {
-		/*std::cout << "\nIteration: " << iteration++ << std::endl;
-		std::cout << "Q" << std::endl;
-		print_partition(Q);
-		std::cout << "K" << std::endl;
-		print_partition(K);
-		std::cout << "L" << std::endl;
-		print_partition(L);
-		*/
 		std::vector<int> S;
 		if (L.size()) {
 			S = L.back(); L.pop_back();
@@ -312,8 +297,6 @@ std::vector<std::vector<int>> Graph::modular_partition(std::vector<std::vector<i
 			}
 		}
 	}
-	// std::cout << "Final partition: " << std::endl;
-	// print_partition(Q);
 	return Q;
 }
 
