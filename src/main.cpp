@@ -25,7 +25,7 @@ Graph* read_graph() {
     return g;
 }
 
-ContractionSequence contract_and_recompose(Graph* g) {
+ContractionSequence contract_and_recompose(Graph* g, int& max_width) {
 	auto [decomposition, modular_tree] = g->decompose();
 	std::vector<std::pair<ContractionSequence, int>> seq;
 	std::cerr << "Decomposition size: " << decomposition.size() << std::endl;
@@ -35,7 +35,7 @@ ContractionSequence contract_and_recompose(Graph* g) {
 		ContractionSequence cs;
 		s.solve();
 		cs = s.get_contraction();
-		
+		max_width = std::max(max_width, h.width(cs));
 
 		int rep;
 		for (auto &[a, b] : cs) {
@@ -52,8 +52,10 @@ ContractionSequence contract_and_recompose(Graph* g) {
 int main(int argc, char* argv[]) {
     Graph* g = read_graph();
    	
-	ContractionSequence result = contract_and_recompose(g);
+	int max_width = 0;
+	ContractionSequence result = contract_and_recompose(g, max_width);
     auto w = g->width(result);
+	assert(w == max_width);
     
 	std::cerr << "Twin Width: " << w << std::endl;
 
