@@ -30,11 +30,18 @@ ContractionSequence contract_and_recompose(Graph* g) {
 	std::vector<std::pair<ContractionSequence, int>> seq;
 	std::cerr << "Decomposition size: " << decomposition.size() << std::endl;
 	for (Graph h : decomposition) {
-		std::cerr << "Size of h: " << h.count_vertices() << std::endl;
+		// std::cerr << "Size of h: " << h.count_vertices() << std::endl;
 		Solver s(h);
+		ContractionSequence cs;
 		s.solve();
-		ContractionSequence cs = s.get_contraction();
+		cs = s.get_contraction();
+		
+
 		int rep;
+		for (auto &[a, b] : cs) {
+			// std::cerr << a << " " << b << std::endl;
+			a = h.label(a), b = h.label(b);
+		}
 		if (cs.size() == 0) rep = h.label(0);
 		else rep = cs.back().first;
 		seq.emplace_back(cs, rep);
@@ -45,15 +52,11 @@ ContractionSequence contract_and_recompose(Graph* g) {
 int main(int argc, char* argv[]) {
     Graph* g = read_graph();
    	
-    // Solver s(*g);
-    // s.solve();
-	
 	ContractionSequence result = contract_and_recompose(g);
     auto w = g->width(result);
     
 	std::cerr << "Twin Width: " << w << std::endl;
 
-	// s.print_contraction();
 	for (auto [a, b] : result) {
 		std::cout << a+1 << " " << b+1 << std::endl;
 	}

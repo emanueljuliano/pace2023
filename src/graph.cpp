@@ -320,7 +320,7 @@ std::vector<std::vector<int>> Graph::modular_partition(std::vector<std::vector<i
 std::vector<std::vector<int>> Graph::prime_decomposition() const {
 	int n = this->g.size();
 	std::vector<std::vector<int>> ret;
-	Graph G_cur = *this;
+	Graph G_cur(n);
 	for (int x = 0; x < n; x++) {
 		std::vector<std::vector<int>> partition;
 		partition.push_back({x});
@@ -369,6 +369,7 @@ void Graph::decompose(
     if (parent != -1) modular_tree[parent].second.push_back(tree_index);
 
 	if (n == 1) {
+		modular_tree[tree_index].first = decomposition.size();
 		decomposition.push_back(G);
 	}
     else if (!G.is_connected()) {
@@ -402,6 +403,7 @@ void Graph::decompose(
         std::vector<std::vector<int>> partition = G.prime_decomposition();
 		
 		if (int(partition.size()) == n) {
+			modular_tree[tree_index].first = decomposition.size();
 			decomposition.push_back(G);
     		return;
 		}
@@ -417,7 +419,7 @@ void Graph::decompose(
 	}
 }
 
-std::pair<std::vector<Graph>,  std::vector<std::pair<int, std::vector<int>>>> Graph::decompose() const {
+std::pair<std::vector<Graph>, std::vector<std::pair<int, std::vector<int>>>> Graph::decompose() const {
     std::vector<Graph> decomposition;
     std::vector<std::pair<int, std::vector<int>>> modular_tree;
     this->decompose(decomposition, modular_tree, -1);
@@ -430,16 +432,14 @@ ContractionSequence Graph::recompose(
     ContractionSequence ret;
     int n = modular_tree.size();
 	std::vector<int> rep(n);
-	int pos = 0;
 	std::function<void(int)> dfs = [&](int v) {
 		auto [type, neig] = modular_tree[v];
 
 		if (neig.empty()) { // folha
-			for (std::pair<int, int> p : seq[pos].first) {
+			for (std::pair<int, int> p : seq[type].first) {
 				ret.push_back(p);
 			}
-			rep[v] = seq[pos].second;
-			pos++;
+			rep[v] = seq[type].second;
 			return;
 		}
 		
@@ -594,6 +594,7 @@ int Graph::width(const ContractionSequence& seq) const {
 	int answer = 0;
 	std::vector<bool> removed(this->count_vertices(), false);
 	for (auto [p, u] : seq) {
+		assert(!removed[p] and !removed[u]);
 		auto [to_remove, to_add] = this->contraction_edges(removed, H, p, u);
 		removed[u] = true;
 		for (auto [x, y] : to_remove)
