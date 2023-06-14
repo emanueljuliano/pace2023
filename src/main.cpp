@@ -32,7 +32,6 @@ Graph* read_graph() {
         int a, b;
 		in >> a >> b;
         g->add_edge(a - 1, b - 1);
-		std::cout << "? " << a << " " << b << std::endl;
 	}
 
     return g;
