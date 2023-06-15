@@ -1,5 +1,5 @@
 https://pacechallenge.org/2023/
-# 2020 PACE Challenge
+# 2023 PACE Challenge
 This repository provides an exact solver to contract a given Graph into a single vertex.
 We approach this problem by ...
 
@@ -16,4 +16,5 @@ We approach this problem by ...
 
 ## Run Tests
 To run the tests, pass the name of a test file, as shown below (from build folder):
+
 `./pace < tests`
