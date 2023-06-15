@@ -1,5 +1,5 @@
 https://pacechallenge.org/2023/
-# Contraction Sequence solver
+# 2020 PACE Challenge
 This repository provides an exact solver to contract a given Graph into a single vertex.
 We approach this problem by ...
 
