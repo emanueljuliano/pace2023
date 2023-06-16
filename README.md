@@ -1,7 +1,7 @@
 # Dino
 
 This repository provides an exact solver to the twin-width of a graph, named Dino. It was used as a submission to the 2023
-Parameterized Algorithms and Computational Experiments ([Pace 2023](https://pacechallenge.org/). We approached this problem by implementing the [SAT formulation](https://arxiv.org/abs/2110.06146) for it, combined with an algorithm which finds a modular-like decomposition of a graph and an algorithm to find the twin-width of trees.
+Parameterized Algorithms and Computational Experiments ([Pace 2023](https://pacechallenge.org/)). We approached this problem by implementing the [SAT formulation](https://arxiv.org/abs/2110.06146) for it, combined with an algorithm which finds a modular-like decomposition of a graph and an algorithm to find the twin-width of trees.
 
 A description of the our approach is available [here](description.pdf).
 
